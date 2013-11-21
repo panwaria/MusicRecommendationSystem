@@ -1,4 +1,14 @@
+import java.util.List;
 
-public class Track {
-
+/**
+ * Class to represent a track.
+ */
+public class Track 
+{
+	/* Member Variables */
+	public String mTrackID;
+	public List<String> mTagNames;
+	
+	
+	/* Methods */
 }

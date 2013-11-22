@@ -1,12 +1,18 @@
-import java.util.HashMap;
+package algos;
+
 import java.util.List;
 import java.util.Map;
+
+import models.DataSet;
+import models.Song;
+
+import com.google.common.collect.Maps;
 
 /**
  * Class to represent TopNPopularSongs. The recommendations from this algorithm will be 
  * used as a baseline as compared to our other algorithms.
  */
-public class AlgorithmTopNPopularSongs  implements Algorithm
+public class TopNPopularSongs  implements Algorithm
 {
 	/**
 	 * TODO: Let's describe the algorithm used and the features considered here.
@@ -21,39 +27,37 @@ public class AlgorithmTopNPopularSongs  implements Algorithm
 	
 	/* Methods */
 	
-	AlgorithmTopNPopularSongs(int N)
+	public TopNPopularSongs(int numSongsToRecommend)
 	{
-		mSongsCount = N;
+		this.mSongsCount = numSongsToRecommend;
 	}
 	
-	@Override
-	public Map<String, List<Song>> getTopNPopularSongs(int N) 
-	{
-		// TODO: Not sure if we need this method.
-		return null;
-	}
-
-	@Override
 	public void generateModel(DataSet trainDataSet) 
 	{
 		// No model to generate here as such. We just get N popular songs from the dataset.
 		mOverallNPopularSongs = trainDataSet.getOverallNPopularSongs(mSongsCount);
+		
+		System.out.println("Most popular songs in the dataset ..");
+		for(Song s: mOverallNPopularSongs) {
+			System.out.println("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
+		}
 	}
 
-	@Override
+	/**
+	 * Recommend the top songs based on the overall popularity of songs in the dataset.
+	 */
 	public Map<String, List<Song>> recommend(DataSet testSet) 
 	{
 		List<String> allTestSetUsers = testSet.getListOfUsers();
 		if(allTestSetUsers == null || allTestSetUsers.isEmpty() || mOverallNPopularSongs == null)
 			return null;
 		
-		Map<String, List<Song>> recommendation = new HashMap<String, List<Song>>();
-		
+		Map<String, List<Song>> recommendations = Maps.newHashMap();
 		// Recommending same set of popular songs to every user.
 		for (String userID : allTestSetUsers) 
-			recommendation.put(userID, mOverallNPopularSongs);
+			recommendations.put(userID, mOverallNPopularSongs);
 		
-		return recommendation;
+		return recommendations;
 	}
 
 }

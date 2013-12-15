@@ -3,6 +3,8 @@ package utils;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import models.DataSet;
 import models.Song;
 
@@ -12,6 +14,8 @@ import models.Song;
  */
 public class Utility
 {
+	private static Logger LOG = Logger.getLogger(Utility.class);
+	
 	/**
 	 * Method to get the accuracy of the recommendations returned by different algorithms.
 	 * @param recommendation	Map of UserID to the List of recommended songs
@@ -34,13 +38,14 @@ public class Utility
 			}
 			
 			double accuracyForUser = (matchedSongs)/(double)totalRecommendations;
-			System.out.println("Accuracy for user " + userId + " is " + accuracyForUser + " with matched songs " + matchedSongs);
+			LOG.debug("Accuracy for user " + userId + " is " + accuracyForUser + 
+					" with " + matchedSongs + " matched songs ");
 			
 			overallAccuracy += accuracyForUser;
 		}
 		
 		int numUsers = recommendations.keySet().size();
-		return overallAccuracy/numUsers;
+		return (overallAccuracy*100)/numUsers;
 	}
 	
 	/**

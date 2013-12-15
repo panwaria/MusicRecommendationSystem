@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import org.apache.log4j.Logger;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -13,7 +15,7 @@ import com.google.common.collect.Maps;
  */
 public class DataSet 
 {
-	/* Member Variables */
+	private static Logger LOG = Logger.getLogger(DataSet.class);
 
 	// User Listening History : Map<UserID, Map<SongID, PlayCount>>
 	private Map<String, Map<String, Integer>> mUserListeningHistory = Maps.newHashMap();
@@ -28,6 +30,19 @@ public class DataSet
 		this.mSongMap = mSongMap;
 	}
 
+	/**
+	 * Get the summary of the dataset
+	 * @return
+	 */
+	public String getDatasetStats()
+	{
+		StringBuilder stats = new StringBuilder();
+		stats.append("Users : ").append(mUserListeningHistory.keySet().size()).append("\t");
+		stats.append("Songs : ").append(mSongMap.keySet().size());
+		
+		return stats.toString();
+	}
+	
 	public Map<String, Map<String, Integer>> getmUserListeningHistory() {
 		return mUserListeningHistory;
 	}
@@ -51,7 +66,7 @@ public class DataSet
 	 */
 	public List<String> getListOfUsers()
 	{
-		System.out.println("No of users in dataset : " + mUserListeningHistory.keySet().size());
+		LOG.debug("No of users in dataset : " + mUserListeningHistory.keySet().size());
 		return Lists.newArrayList(mUserListeningHistory.keySet());
 	}
 	
@@ -63,7 +78,7 @@ public class DataSet
 	 */
 	public List<Song> getOverallNPopularSongs(int N)
 	{
-		System.out.println("Calculating the " + N + " most popular songs in the dataset ..");
+		LOG.debug("Calculating the " + N + " most popular songs in the dataset ..");
 		PriorityQueue<SongFrequency> topSongs = new PriorityQueue<DataSet.SongFrequency>(N);
 		for(Map.Entry<String, Song> entry : mSongMap.entrySet()) {
 			String songId = entry.getKey();
@@ -161,9 +176,5 @@ public class DataSet
 		// TODO: Implement.
 		return null;
 	}
-
-	
-	
-	
 
 }

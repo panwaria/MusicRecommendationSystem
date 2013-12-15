@@ -3,23 +3,22 @@ package algos;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import models.DataSet;
 import models.Song;
 
 import com.google.common.collect.Maps;
 
 /**
- * Class to represent TopNPopularSongs. The recommendations from this algorithm will be 
- * used as a baseline as compared to our other algorithms.
+ * Class to represent TopNPopularSongs algorithm. 
+ * 
+ * The recommendations from this algorithm will be used as a baseline to compare the accuracy and
+ * performance of other recommendation algorithms.
  */
 public class TopNPopularSongs  implements Algorithm
 {
-	/**
-	 * TODO: Let's describe the algorithm used and the features considered here.
-	 * 
-	 */
-	
-	/* Member Variables */
+	private Logger LOG = Logger.getLogger(TopNPopularSongs.class);
 	
 	int mSongsCount = 0; 						// Number of songs to be returned for every user.
 	List<Song> mOverallNPopularSongs = null;	// List of overall popular songs in the training dataset.
@@ -37,9 +36,9 @@ public class TopNPopularSongs  implements Algorithm
 		// No model to generate here as such. We just get N popular songs from the dataset.
 		mOverallNPopularSongs = trainDataSet.getOverallNPopularSongs(mSongsCount);
 		
-		System.out.println("Most popular songs in the dataset ..");
+		LOG.info("Most popular songs in the dataset ..");
 		for(Song s: mOverallNPopularSongs) {
-			System.out.println("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
+			LOG.info("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
 		}
 	}
 

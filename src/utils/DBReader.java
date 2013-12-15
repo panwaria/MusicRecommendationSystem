@@ -11,6 +11,7 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import models.Constants;
 import models.DataSet;
 import models.Song;
 
@@ -21,9 +22,7 @@ public class DBReader {
 	
 	// Connect to the database
 	public DBReader() 
-	{
-
-	}
+	{	}
 	
 	private Connection getDBConnection()
 	{
@@ -78,8 +77,9 @@ public class DBReader {
 	 */
 	public DataSet createDataSet(String datasetTableName) 
 	{
-		String selectSQL = "SELECT user_id, song_id, play_count FROM " + datasetTableName + 
-				" ORDER by user_id";
+		String selectSQL = 	"SELECT " + Constants.COLUMN_USER_ID + ", " + Constants.COLUMN_SONG_ID + ", " + Constants.COLUMN_PLAY_COUNT + " " + 
+							"FROM " + datasetTableName + " " +
+							"ORDER by " + Constants.COLUMN_USER_ID;
 		System.out.println("Querying db for SQL query : " + selectSQL);
 		
 		Map<String, Map<String, Integer>> userListeningMap = Maps.newHashMap();
@@ -88,22 +88,22 @@ public class DBReader {
 		long startTime = System.currentTimeMillis();
 		PreparedStatement preparedStatement = null;
 		Connection dbConn = getDBConnection();
-		try {
+		try 
+		{
 			preparedStatement = dbConn.prepareStatement(selectSQL);
 			ResultSet rs = preparedStatement.executeQuery();
-			while(rs.next()) {
-				String userId = rs.getString("user_id");
-				String songId = rs.getString("song_id");
-				Integer playCount = rs.getInt("play_count");
+			while(rs.next()) 
+			{
+				String userId = rs.getString(Constants.COLUMN_USER_ID);
+				String songId = rs.getString(Constants.COLUMN_SONG_ID);
+				Integer playCount = rs.getInt(Constants.COLUMN_PLAY_COUNT);
 				
 				// Update listening history for a user
 				Map<String, Integer> userIdListenedSongsMap = null;
-				if(userListeningMap.containsKey(userId)) {
+				if(userListeningMap.containsKey(userId)) 
 					userIdListenedSongsMap = userListeningMap.get(userId);
-				}
-				else {
+				else
 					userIdListenedSongsMap = Maps.newHashMap();
-				}
 				
 				userIdListenedSongsMap.put(songId, playCount);
 				userListeningMap.put(userId, userIdListenedSongsMap);
@@ -111,11 +111,13 @@ public class DBReader {
 				// Update the list of users who have listened to a particular song
 				Song song = null;
 				List<String> listenersList = null;
-				if(songIdToObjMap.containsKey(songId)) {
+				if(songIdToObjMap.containsKey(songId)) 
+				{
 					song = songIdToObjMap.get(songId);
 					listenersList = song.getmListenersList();
 				}
-				else {
+				else 
+				{
 					song = new Song();
 					listenersList = Lists.newArrayList();
 				}
@@ -127,22 +129,27 @@ public class DBReader {
 				
 				songIdToObjMap.put(songId, song);
 			}			
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e)
+		{
 			e.printStackTrace();
 		}
-		finally {
-			if (preparedStatement != null) {
-				try {
+		finally 
+		{
+			if (preparedStatement != null) 
+			{
+				try
+				{
 					preparedStatement.close();
-				} catch (SQLException e) {
+				}
+				catch (SQLException e) 
+				{
 					e.printStackTrace();
 				}
 			}
  
-			if (dbConn != null) {
+			if (dbConn != null) 
 				closeDBConnection(dbConn);
-			}
- 
 		}		
 		
 		long endTime = System.currentTimeMillis();

@@ -21,7 +21,8 @@ import com.google.common.collect.Maps;
  * recommendations to the users in the test set according to data provided in
  * the training set.
  */
-public class MusicRecommender {
+public class MusicRecommender 
+{
 	
 	private static Logger LOG = Logger.getLogger(MusicRecommender.class);
 	
@@ -30,9 +31,9 @@ public class MusicRecommender {
 	private static Map<String, Algorithm> getAlgorithms(int recommendationCount)
 	{
 		// Algorithms
-		Algorithm overallTopNSongsAlgo = new TopNPopularSongs(recommendationCount);
-		Algorithm kNNAlgo = new KNN(recommendationCount) ;
-		Algorithm naiveBayesAlgo = new NaiveBayes(recommendationCount);
+		Algorithm overallTopNSongsAlgo 	= new TopNPopularSongs(recommendationCount);
+		Algorithm kNNAlgo 				= new KNN(recommendationCount) ;
+		Algorithm naiveBayesAlgo 		= new NaiveBayes(recommendationCount);
 
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
@@ -49,10 +50,13 @@ public class MusicRecommender {
 	 * 
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
 		// Parse the command line arguments
-		if(args == null || (args.length !=3)) {
-			throw new IllegalArgumentException("Please run the program with correct arguments !!");
+		if(args == null || (args.length !=3)) 
+		{
+			throw new IllegalArgumentException("Please run the program with correct arguments\n" +
+					"Usage: <command> <datasetTableName> <numRecommendations> <numCrossValidationFolds>\n");
 		}
 
 		String datasetTable = args[0];
@@ -65,7 +69,9 @@ public class MusicRecommender {
 		// using cross-validation approach.
 		Map<String, Map<Integer, Double>> algosAccuracy = Maps.newHashMap();
 		CrossValidationFactory datasetFactory = new CrossValidationFactory(datasetTable, numCrossValidationFolds);
-		for(int runId = 0; runId < numCrossValidationFolds; runId++) {
+		
+		for(int runId = 0; runId < numCrossValidationFolds; runId++) 
+		{
 			Map<String, Algorithm> algosToRun = getAlgorithms(numSongRecommendationPerUser);
 			
 			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
@@ -85,7 +91,8 @@ public class MusicRecommender {
 			 * 2) Recommend top N songs based on the learned model.
 			 * 3) Compare the predicted songs with the actual songs listened by a test data set user.
 			 */			
-			for(Map.Entry<String, Algorithm> entry : algosToRun.entrySet()) {
+			for(Map.Entry<String, Algorithm> entry : algosToRun.entrySet()) 
+			{
 				String algoName = entry.getKey();
 				Algorithm algo = entry.getValue();
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
@@ -96,12 +103,10 @@ public class MusicRecommender {
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
 				
 				Map<Integer, Double> algoRunsResult = null;
-				if(algosAccuracy.containsKey(algoName)) {
+				if(algosAccuracy.containsKey(algoName)) 
 					algoRunsResult = algosAccuracy.get(algoName);
-				}
-				else {
+				else 
 					algoRunsResult = Maps.newHashMap();
-				}
 				
 				algoRunsResult.put(runId + 1, algoAccuracy);
 				algosAccuracy.put(algoName, algoRunsResult);
@@ -112,14 +117,14 @@ public class MusicRecommender {
 		LOG.info("\n\n");
 		LOG.info("Overall accuracy of all algorithms for recommending top " + numSongRecommendationPerUser + 
 				" songs with " + numCrossValidationFolds + "-fold cross validations approach ..");
-		for(Map.Entry<String, Map<Integer, Double>> entry : algosAccuracy.entrySet()) {
+		for(Map.Entry<String, Map<Integer, Double>> entry : algosAccuracy.entrySet()) 
+		{
 			String algoName = entry.getKey();
 			Map<Integer, Double> algoRunsResult = algosAccuracy.get(algoName);
 			
 			double sumAccuracies = 0.0;
-			for(Map.Entry<Integer, Double> entry2: algoRunsResult.entrySet()) {
+			for(Map.Entry<Integer, Double> entry2: algoRunsResult.entrySet()) 
 				sumAccuracies += entry2.getValue();
-			}
 			
 			double avgAccuarcy = sumAccuracies/algoRunsResult.size();
 			LOG.info("Average accuracy for algorithm '" + algoName + "' is " + df.format(avgAccuarcy) + " % ");

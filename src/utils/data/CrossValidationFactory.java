@@ -26,10 +26,10 @@ import models.Constants;
  */
 public class CrossValidationFactory {
 
-	private DataSet fullDataset = null;
-	private List<DataSet> datasetFolds = Lists.newArrayList();
+	private DataSet mFullDataset = null;
+	private List<DataSet> mDatasetFolds = Lists.newArrayList();
 	
-	private DBReader reader = new DBReader();
+	private DBReader mReader = new DBReader();
 	
 	/**
 	 * Initialize with the base dataset. This dataset would then be split into various chunks to
@@ -40,7 +40,7 @@ public class CrossValidationFactory {
 	 */
 	public CrossValidationFactory(String dbTableName, int numFolds)
 	{
-		fullDataset = reader.createDataSet(dbTableName);
+		mFullDataset = mReader.createDataSet(dbTableName);
 		createDatasetFolds(numFolds);
 	}
 	
@@ -50,14 +50,14 @@ public class CrossValidationFactory {
 	 */
 	private void createDatasetFolds(int numFolds)
 	{
-		Map<String, Map<String, Integer>> fullListeningHistory = fullDataset.getmUserListeningHistory();
-		Map<String, Song> fullSongMap = fullDataset.getmSongMap();
+		Map<String, Map<String, Integer>> fullListeningHistory = mFullDataset.getmUserListeningHistory();
+		Map<String, Song> fullSongMap = mFullDataset.getmSongMap();
 		
 		List<String> allListeners = Lists.newArrayList(fullListeningHistory.keySet());
 		int foldSize = allListeners.size()/numFolds;
 		
 		for(int numUser=0; numUser < allListeners.size(); numUser++) {
-			datasetFolds.add(createDatasetFold(numUser, numUser+foldSize, allListeners, fullListeningHistory, fullSongMap));
+			mDatasetFolds.add(createDatasetFold(numUser, numUser+foldSize, allListeners, fullListeningHistory, fullSongMap));
 			numUser += foldSize;
 		}
 	}
@@ -91,7 +91,7 @@ public class CrossValidationFactory {
 	
 	public DataSet getFullDataset()
 	{
-		return fullDataset;
+		return mFullDataset;
 	}
 	
 	/**
@@ -104,19 +104,19 @@ public class CrossValidationFactory {
 	public Map<String, DataSet> getDatasets(int runId)
 	{
 		Map<String, DataSet> datasets = Maps.newHashMap();
-		DataSet dataset = datasetFolds.get(runId);
+		DataSet dataset = mDatasetFolds.get(runId);
 		datasets.putAll(getTestTuneDataset(dataset));
 		
 		Map<String, Map<String, Integer>> trainListeningHistory = Maps.newHashMap();
 		Map<String, Song> trainSongMap = Maps.newHashMap();
 		
-		for(int foldId=0; foldId < datasetFolds.size(); foldId++) {
+		for(int foldId=0; foldId < mDatasetFolds.size(); foldId++) {
 			// Don't include the test datafold
 			if(foldId == runId) {
 				continue;
 			}
 			
-			DataSet fold = datasetFolds.get(foldId);
+			DataSet fold = mDatasetFolds.get(foldId);
 			trainListeningHistory.putAll(fold.getmUserListeningHistory());
 			trainSongMap.putAll(fold.getmSongMap());
 		}

@@ -101,10 +101,13 @@ public class CrossValidationFactory {
 	 * @param foldId
 	 * @return
 	 */
-	public Map<String, DataSet> getDatasets(int runId)
+	public Map<String, DataSet> getDatasets()
 	{
+		// Randomly generate a fold that would be used as the test fold.
+		int testFoldId = 1 + (int)(Math.random() * ((datasetFolds.size() - 1) + 1));
+		
 		Map<String, DataSet> datasets = Maps.newHashMap();
-		DataSet dataset = datasetFolds.get(runId);
+		DataSet dataset = datasetFolds.get(testFoldId);
 		datasets.putAll(getTestTuneDataset(dataset));
 		
 		Map<String, Map<String, Integer>> trainListeningHistory = Maps.newHashMap();
@@ -112,7 +115,7 @@ public class CrossValidationFactory {
 		
 		for(int foldId=0; foldId < datasetFolds.size(); foldId++) {
 			// Don't include the test datafold
-			if(foldId == runId) {
+			if(foldId == testFoldId) {
 				continue;
 			}
 			
@@ -141,15 +144,15 @@ public class CrossValidationFactory {
 		Map<String, Map<String, Integer>> listeningHistory = dataset.getmUserListeningHistory();
 		Map<String, Song> songMap = dataset.getmSongMap();
 		
-		Map<String, Map<String, Integer>> testListeningHistory = Maps.newHashMap();
-		Map<String, Song> testSongMap = Maps.newHashMap();
+		Map<String, Map<String, Integer>> testHiddenListeningHistory = Maps.newHashMap();
+		Map<String, Song> testHiddenSongMap = Maps.newHashMap();
 		
-		Map<String, Map<String, Integer>> tuneListeningHistory = Maps.newHashMap();
-		Map<String, Song> tuneSongMap = Maps.newHashMap();
+		Map<String, Map<String, Integer>> testVisibleListeningHistory = Maps.newHashMap();
+		Map<String, Song> testVisibleSongMap = Maps.newHashMap();
 		
 		for(Map.Entry<String, Map<String, Integer>> entry : listeningHistory.entrySet()) {
-			Map<String, Integer> testUserPlayCountMap = Maps.newHashMap();
-			Map<String, Integer> tuneUserPlayCountMap = Maps.newHashMap();
+			Map<String, Integer> testHiddenUserPlayCountMap = Maps.newHashMap();
+			Map<String, Integer> testVisibleUserPlayCountMap = Maps.newHashMap();
 			
 			String user = entry.getKey();
 			Map<String, Integer> songsPlayCountMap = entry.getValue();
@@ -157,25 +160,25 @@ public class CrossValidationFactory {
 			List<String> songs = Lists.newArrayList(songsPlayCountMap.keySet());
 			for(int i=0; i <= numSongs/2; i++) {
 				String song = songs.get(i);
-				tuneUserPlayCountMap.put(song, songsPlayCountMap.get(song));
-				tuneSongMap.put(song, songMap.get(song));
+				testVisibleUserPlayCountMap.put(song, songsPlayCountMap.get(song));
+				testVisibleSongMap.put(song, songMap.get(song));
 			}
 			for(int i=(numSongs/2)+1; i < numSongs; i++) {
 				String song = songs.get(i);
-				testUserPlayCountMap.put(song, songsPlayCountMap.get(song));
-				testSongMap.put(song, songMap.get(song));
+				testHiddenUserPlayCountMap.put(song, songsPlayCountMap.get(song));
+				testHiddenSongMap.put(song, songMap.get(song));
 			}
 			
-			tuneListeningHistory.put(user, tuneUserPlayCountMap);
-			testListeningHistory.put(user, testUserPlayCountMap);
+			testVisibleListeningHistory.put(user, testVisibleUserPlayCountMap);
+			testHiddenListeningHistory.put(user, testHiddenUserPlayCountMap);
 		}
 		
-		DataSet tuneDataset = new DataSet(tuneListeningHistory, tuneSongMap);
-		DataSet testDataset = new DataSet(testListeningHistory, testSongMap);
+		DataSet testVisibleDataset = new DataSet(testVisibleListeningHistory, testVisibleSongMap);
+		DataSet testHiddenDataset = new DataSet(testHiddenListeningHistory, testHiddenSongMap);
 		
 		Map<String, DataSet> datasetsMap = Maps.newHashMap();
-		datasetsMap.put(Constants.TUNE_DATASET, tuneDataset);
-		datasetsMap.put(Constants.TEST_DATASET, testDataset);
+		datasetsMap.put(Constants.TEST_VISIBLE_DATASET, testVisibleDataset);
+		datasetsMap.put(Constants.TEST_HIDDEN_DATASET, testHiddenDataset);
 		return datasetsMap;
 	}
 	

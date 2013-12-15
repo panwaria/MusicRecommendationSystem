@@ -13,7 +13,7 @@ public class Constants {
 	public static final String DB_USER 	= "msd_user";
 	public static final String DB_PWD  	= "msd_user";
 	
-	// Fields/Columns in msd_train and msd_test tables
+	// Columns in msd_train and msd_test tables
 	public static final String COLUMN_USER_ID 		= "user_id";
 	public static final String COLUMN_SONG_ID 		= "song_id";
 	public static final String COLUMN_PLAY_COUNT 	= "play_count";
@@ -28,7 +28,7 @@ public class Constants {
 	public static final String NAIVE_BAYES 			= 	"Naive Bayes Algorithm";
 	
 	// Dataset
-	public static final String TRAIN_DATASET 	= "train";
-	public static final String TUNE_DATASET		= "tune";
-	public static final String TEST_DATASET		= "test";	
+	public static final String TRAIN_DATASET 			= "train";
+	public static final String TEST_VISIBLE_DATASET		= "test_visible";
+	public static final String TEST_HIDDEN_DATASET		= "test_hidden";	
 }

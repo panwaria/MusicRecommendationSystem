@@ -48,41 +48,49 @@ public class MusicRecommender
 	 * Main method which will execute different Recommendation Algorithms and
 	 * compare their results.
 	 * 
+	 * Sample run :
+	 * MusicRecommender msd_test 10 40 5
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) 
 	{
 		// Parse the command line arguments
-		if(args == null || (args.length !=3)) 
+
+		if(args == null || (args.length != 4)) 
 		{
-			throw new IllegalArgumentException("Please run the program with correct arguments\n" +
-					"Usage: <command> <datasetTableName> <numRecommendations> <numCrossValidationFolds>\n");
+			StringBuilder errorMsg = new StringBuilder();
+			errorMsg.append("Please run the program with correct arguments !!").append("\n");
+			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs>");
+			throw new IllegalArgumentException("Please run the program with correct arguments !!");
 		}
 
 		String datasetTable = args[0];
 		int numSongRecommendationPerUser = Integer.parseInt(args[1]);
 		int numCrossValidationFolds = Integer.parseInt(args[2]);
+		int runs = Integer.parseInt(args[3]);
 		LOG.info("Dataset Table : " + datasetTable + ", Song recommendations per user : " + 
-				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds);
+				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds + 
+				", Job runs : " + runs);
 		
 		// Run algorithms multiple times to get average accuracy results for different datasets
 		// using cross-validation approach.
 		Map<String, Map<Integer, Double>> algosAccuracy = Maps.newHashMap();
 		CrossValidationFactory datasetFactory = new CrossValidationFactory(datasetTable, numCrossValidationFolds);
-		
-		for(int runId = 0; runId < numCrossValidationFolds; runId++) 
-		{
+
+		for(int runId = 0; runId < runs; runId++) 
+		 {
 			Map<String, Algorithm> algosToRun = getAlgorithms(numSongRecommendationPerUser);
 			
-			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
+			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets();
 			DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
-			DataSet tuneDataset = foldDatasets.get(Constants.TUNE_DATASET);
-			DataSet testDataset = foldDatasets.get(Constants.TEST_DATASET);
+			DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
+			DataSet testHiddenDataset = foldDatasets.get(Constants.TEST_HIDDEN_DATASET);
 			
 			LOG.info("\n\n");
 			LOG.info("Train dataset summary for run " + runId + " is " + trainDataset.getDatasetStats());
-			LOG.info("Tune dataset summary for run " + runId + " is " + tuneDataset.getDatasetStats());
-			LOG.info("Test dataset summary for run " + runId + " is " + testDataset.getDatasetStats());
+			LOG.info("Test visible dataset summary for run " + runId + " is " + testVisibleDataset.getDatasetStats());
+			LOG.info("Test hidden dataset summary for run " + runId + " is " + testHiddenDataset.getDatasetStats());
 			
 			/**
 			 * For each recommendation algorithm do the following :
@@ -98,8 +106,8 @@ public class MusicRecommender
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
 				algo.generateModel(trainDataset);
-				Map<String, List<Song>> recommendations = algo.recommend(tuneDataset);
-				double algoAccuracy = Utility.getAccuracy(recommendations, testDataset);
+				Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
+				double algoAccuracy = Utility.getAccuracy(recommendations, testHiddenDataset);
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
 				
 				Map<Integer, Double> algoRunsResult = null;

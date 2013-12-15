@@ -27,7 +27,7 @@ public class Utility
 		for(Map.Entry<String, List<Song>> entry : recommendations.entrySet()) {
 			String userId = entry.getKey();
 			List<Song> predictedSongs = entry.getValue();
-			Map<String, Integer> actualSongs = testDataset.getmUserListeningHistory().get(userId); 
+			Map<String, Integer> actualSongs = testDataset.getUserListeningHistory().get(userId); 
 
 			int totalRecommendations = predictedSongs.size();
 			int matchedSongs = 0;

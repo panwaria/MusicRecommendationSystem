@@ -24,8 +24,8 @@ import models.Constants;
  * @author excelsior
  *
  */
-public class CrossValidationFactory {
-
+public class CrossValidationFactory
+{
 	private DataSet mFullDataset = null;
 	private List<DataSet> mDatasetFolds = Lists.newArrayList();
 	
@@ -50,13 +50,15 @@ public class CrossValidationFactory {
 	 */
 	private void createDatasetFolds(int numFolds)
 	{
-		Map<String, Map<String, Integer>> fullListeningHistory = mFullDataset.getmUserListeningHistory();
-		Map<String, Song> fullSongMap = mFullDataset.getmSongMap();
+		Map<String, Map<String, Integer>> fullListeningHistory = mFullDataset.getUserListeningHistory();
+		Map<String, Song> fullSongMap = mFullDataset.getSongMap();
 		
 		List<String> allListeners = Lists.newArrayList(fullListeningHistory.keySet());
-		int foldSize = allListeners.size()/numFolds;
+		int allListenersSize = allListeners.size();
+		int foldSize = allListenersSize/numFolds;
 		
-		for(int numUser=0; numUser < allListeners.size(); numUser++) {
+		for(int numUser = 0; numUser < allListenersSize; numUser++) 
+		{
 			mDatasetFolds.add(createDatasetFold(numUser, numUser+foldSize, allListeners, fullListeningHistory, fullSongMap));
 			numUser += foldSize;
 		}
@@ -68,19 +70,21 @@ public class CrossValidationFactory {
 	private DataSet createDatasetFold(int startId, int endId, List<String> allListeners, 
 			Map<String, Map<String, Integer>> fullListeningHistory, Map<String, Song> fullSongMap)
 	{
-		if(endId > allListeners.size()) {
+		if (endId > allListeners.size())
 			endId = allListeners.size();
-		}
 		
 		List<String> listeners = allListeners.subList(startId, endId);
 		Map<String, Map<String, Integer>> foldListeningHistory = Maps.newHashMap();
 		Map<String, Song> foldSongMap = Maps.newHashMap();
-		for(String listener : listeners ) {
+		for (String listener : listeners)
+		{
 			Map<String, Integer> listenerSongsCount = fullListeningHistory.get(listener);
 			foldListeningHistory.put(listener, listenerSongsCount);
-			for(Map.Entry<String, Integer> entry2: listenerSongsCount.entrySet()) {
+			for (Map.Entry<String, Integer> entry2 : listenerSongsCount.entrySet())
+			{
 				String songName = entry2.getKey();
-				if(fullSongMap.containsKey(songName)) {
+				if (fullSongMap.containsKey(songName))
+				{
 					foldSongMap.put(songName, fullSongMap.get(songName));
 				}
 			}
@@ -114,15 +118,15 @@ public class CrossValidationFactory {
 		Map<String, Map<String, Integer>> trainListeningHistory = Maps.newHashMap();
 		Map<String, Song> trainSongMap = Maps.newHashMap();
 		
-		for(int foldId=0; foldId < mDatasetFolds.size(); foldId++) {
+		for(int foldId=0; foldId < mDatasetFolds.size(); foldId++) 
+		{
 			// Don't include the test datafold
-			if(foldId == testFoldId) {
+			if(foldId == testFoldId) 
 				continue;
-			}
 			
 			DataSet fold = mDatasetFolds.get(foldId);
-			trainListeningHistory.putAll(fold.getmUserListeningHistory());
-			trainSongMap.putAll(fold.getmSongMap());
+			trainListeningHistory.putAll(fold.getUserListeningHistory());
+			trainSongMap.putAll(fold.getSongMap());
 		}
 		
 		DataSet trainDataset = new DataSet(trainListeningHistory, trainSongMap);
@@ -142,8 +146,8 @@ public class CrossValidationFactory {
 	 */
 	private static Map<String, DataSet> getTestTuneDataset(DataSet dataset)
 	{
-		Map<String, Map<String, Integer>> listeningHistory = dataset.getmUserListeningHistory();
-		Map<String, Song> songMap = dataset.getmSongMap();
+		Map<String, Map<String, Integer>> listeningHistory = dataset.getUserListeningHistory();
+		Map<String, Song> songMap = dataset.getSongMap();
 		
 		Map<String, Map<String, Integer>> testHiddenListeningHistory = Maps.newHashMap();
 		Map<String, Song> testHiddenSongMap = Maps.newHashMap();
@@ -151,25 +155,28 @@ public class CrossValidationFactory {
 		Map<String, Map<String, Integer>> testVisibleListeningHistory = Maps.newHashMap();
 		Map<String, Song> testVisibleSongMap = Maps.newHashMap();
 		
-		for(Map.Entry<String, Map<String, Integer>> entry : listeningHistory.entrySet()) {
+		for (Map.Entry<String, Map<String, Integer>> entry : listeningHistory.entrySet())
+		{
 			Map<String, Integer> testHiddenUserPlayCountMap = Maps.newHashMap();
 			Map<String, Integer> testVisibleUserPlayCountMap = Maps.newHashMap();
-			
+
 			String user = entry.getKey();
 			Map<String, Integer> songsPlayCountMap = entry.getValue();
 			int numSongs = songsPlayCountMap.size();
 			List<String> songs = Lists.newArrayList(songsPlayCountMap.keySet());
-			for(int i=0; i <= numSongs/2; i++) {
+			for (int i = 0; i <= numSongs / 2; i++)
+			{
 				String song = songs.get(i);
 				testVisibleUserPlayCountMap.put(song, songsPlayCountMap.get(song));
 				testVisibleSongMap.put(song, songMap.get(song));
 			}
-			for(int i=(numSongs/2)+1; i < numSongs; i++) {
+			for (int i = (numSongs / 2) + 1; i < numSongs; i++)
+			{
 				String song = songs.get(i);
 				testHiddenUserPlayCountMap.put(song, songsPlayCountMap.get(song));
 				testHiddenSongMap.put(song, songMap.get(song));
 			}
-			
+		
 			testVisibleListeningHistory.put(user, testVisibleUserPlayCountMap);
 			testHiddenListeningHistory.put(user, testHiddenUserPlayCountMap);
 		}

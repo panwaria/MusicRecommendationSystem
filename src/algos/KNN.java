@@ -57,8 +57,8 @@ public class KNN implements Algorithm
 	private List<Song> getSongRecommendations(String user, DataSet tuneDataset)
 	{
 		Set<String> allSongs = Sets.newHashSet();
-		allSongs.addAll(trainDataset.getmSongMap().keySet());
-		allSongs.addAll(tuneDataset.getmSongMap().keySet());
+		allSongs.addAll(trainDataset.getSongMap().keySet());
+		allSongs.addAll(tuneDataset.getSongMap().keySet());
 		List<String> allSongsList = Lists.newArrayList(allSongs);
 		
 		PriorityQueue<SimilarUser> kNNUsers = getKNNForUser(user, tuneDataset, allSongsList);
@@ -75,7 +75,7 @@ public class KNN implements Algorithm
 		Map<String, Integer> allSongsBwKUsers = Maps.newHashMap();
 		for(SimilarUser user : kNNUsers) {
 			String userName = user.userId;
-			Map<String, Integer> listeningHistory = trainDataset.getmUserListeningHistory().get(userName);
+			Map<String, Integer> listeningHistory = trainDataset.getUserListeningHistory().get(userName);
 			for(Map.Entry<String, Integer> entry : listeningHistory.entrySet()) {
 				String songName = entry.getKey();
 				int songCount = 0;
@@ -101,7 +101,7 @@ public class KNN implements Algorithm
 			}
 		}
 		
-		Map<String, Song> trainSongMap = trainDataset.getmSongMap();
+		Map<String, Song> trainSongMap = trainDataset.getSongMap();
 		for(SongScore songScore : topSongs) {
 			recommendations.add(trainSongMap.get(songScore.songId));
 		}
@@ -144,7 +144,7 @@ public class KNN implements Algorithm
 	private List<Integer> getFeatureVector(String user, List<String> allSongs, DataSet dataset)
 	{
 		List<Integer> songPlaycountFeature = Lists.newArrayList();
-		Map<String, Integer> userListeningHistory = dataset.getmUserListeningHistory().get(user);
+		Map<String, Integer> userListeningHistory = dataset.getUserListeningHistory().get(user);
 		for(String song: allSongs) {
 			if(userListeningHistory.containsKey(song)) {
 				songPlaycountFeature.add(userListeningHistory.get(song));

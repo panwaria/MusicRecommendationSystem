@@ -24,7 +24,8 @@ public class DataSet
 	private Map<String, Song> mSongMap = Maps.newHashMap();
 	
 	public DataSet(Map<String, Map<String, Integer>> mUserListeningHistory,
-			Map<String, Song> mSongMap) {
+			Map<String, Song> mSongMap)
+	{
 		super();
 		this.mUserListeningHistory = mUserListeningHistory;
 		this.mSongMap = mSongMap;
@@ -37,26 +38,29 @@ public class DataSet
 	public String getDatasetStats()
 	{
 		StringBuilder stats = new StringBuilder();
-		stats.append("Users : ").append(mUserListeningHistory.keySet().size()).append("\t");
-		stats.append("Songs : ").append(mSongMap.keySet().size());
+		stats.append("Users: ").append(mUserListeningHistory.keySet().size()).append("\t");
+		stats.append("Songs: ").append(mSongMap.keySet().size());
 		
 		return stats.toString();
 	}
 	
-	public Map<String, Map<String, Integer>> getmUserListeningHistory() {
-		return mUserListeningHistory;
+	public Map<String, Map<String, Integer>> getUserListeningHistory()
+	{
+		return mUserListeningHistory; 
 	}
 
-	public void setmUserListeningHistory(
-			Map<String, Map<String, Integer>> mUserListeningHistory) {
+	public void setUserListeningHistory(Map<String, Map<String, Integer>> mUserListeningHistory) 
+	{
 		this.mUserListeningHistory = mUserListeningHistory;
 	}
 
-	public Map<String, Song> getmSongMap() {
+	public Map<String, Song> getSongMap() 
+	{
 		return mSongMap;
 	}
 
-	public void setmSongMap(Map<String, Song> mSongMap) {
+	public void setSongMap(Map<String, Song> mSongMap) 
+	{
 		this.mSongMap = mSongMap;
 	}
 

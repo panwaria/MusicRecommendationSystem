@@ -24,5 +24,6 @@ public class Constants {
 	
 	// Dataset
 	public static final String TRAIN_DATASET 	= "train";
+	public static final String TUNE_DATASET		= "tune";
 	public static final String TEST_DATASET		= "test";	
 }

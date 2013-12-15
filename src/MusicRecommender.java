@@ -70,9 +70,12 @@ public class MusicRecommender {
 			
 			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
 			DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
+			DataSet tuneDataset = foldDatasets.get(Constants.TUNE_DATASET);
 			DataSet testDataset = foldDatasets.get(Constants.TEST_DATASET);
 			
-			LOG.info("\n\nTrain dataset summary for run " + runId + " is " + trainDataset.getDatasetStats());
+			LOG.info("\n\n");
+			LOG.info("Train dataset summary for run " + runId + " is " + trainDataset.getDatasetStats());
+			LOG.info("Tune dataset summary for run " + runId + " is " + tuneDataset.getDatasetStats());
 			LOG.info("Test dataset summary for run " + runId + " is " + testDataset.getDatasetStats());
 			
 			/**
@@ -88,7 +91,7 @@ public class MusicRecommender {
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
 				algo.generateModel(trainDataset);
-				Map<String, List<Song>> recommendations = algo.recommend(testDataset);
+				Map<String, List<Song>> recommendations = algo.recommend(tuneDataset);
 				double algoAccuracy = Utility.getAccuracy(recommendations, testDataset);
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
 				
@@ -106,7 +109,8 @@ public class MusicRecommender {
 		}
 		
 		// Display the aggregated results for all algorithms
-		LOG.info("\n\nOverall accuracy of all algorithms for recommending top " + numSongRecommendationPerUser + 
+		LOG.info("\n\n");
+		LOG.info("Overall accuracy of all algorithms for recommending top " + numSongRecommendationPerUser + 
 				" songs with " + numCrossValidationFolds + "-fold cross validations approach ..");
 		for(Map.Entry<String, Map<Integer, Double>> entry : algosAccuracy.entrySet()) {
 			String algoName = entry.getKey();

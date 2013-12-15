@@ -104,7 +104,8 @@ public class CrossValidationFactory {
 	public Map<String, DataSet> getDatasets(int runId)
 	{
 		Map<String, DataSet> datasets = Maps.newHashMap();
-		datasets.put(Constants.TEST_DATASET, datasetFolds.get(runId));
+		DataSet dataset = datasetFolds.get(runId);
+		datasets.putAll(getTestTuneDataset(dataset));
 		
 		Map<String, Map<String, Integer>> trainListeningHistory = Maps.newHashMap();
 		Map<String, Song> trainSongMap = Maps.newHashMap();
@@ -125,4 +126,57 @@ public class CrossValidationFactory {
 
 		return datasets;
 	}
+	
+	/**
+	 * The basic idea is to divide the dataset into two parts - one which would be used for tuning
+	 * (contains half listening history of a user) and the other would be used for testing the
+	 * efficiency of the algorithm.
+	 * 
+	 * For a user X, if total number of songs is N :
+	 * Tune dataset would contain : (N/2)+1 songs
+	 * Test dataset would contain : (N/2) songs
+	 */
+	private static Map<String, DataSet> getTestTuneDataset(DataSet dataset)
+	{
+		Map<String, Map<String, Integer>> listeningHistory = dataset.getmUserListeningHistory();
+		Map<String, Song> songMap = dataset.getmSongMap();
+		
+		Map<String, Map<String, Integer>> testListeningHistory = Maps.newHashMap();
+		Map<String, Song> testSongMap = Maps.newHashMap();
+		
+		Map<String, Map<String, Integer>> tuneListeningHistory = Maps.newHashMap();
+		Map<String, Song> tuneSongMap = Maps.newHashMap();
+		
+		for(Map.Entry<String, Map<String, Integer>> entry : listeningHistory.entrySet()) {
+			Map<String, Integer> testUserPlayCountMap = Maps.newHashMap();
+			Map<String, Integer> tuneUserPlayCountMap = Maps.newHashMap();
+			
+			String user = entry.getKey();
+			Map<String, Integer> songsPlayCountMap = entry.getValue();
+			int numSongs = songsPlayCountMap.size();
+			List<String> songs = Lists.newArrayList(songsPlayCountMap.keySet());
+			for(int i=0; i <= numSongs/2; i++) {
+				String song = songs.get(i);
+				tuneUserPlayCountMap.put(song, songsPlayCountMap.get(song));
+				tuneSongMap.put(song, songMap.get(song));
+			}
+			for(int i=(numSongs/2)+1; i < numSongs; i++) {
+				String song = songs.get(i);
+				testUserPlayCountMap.put(song, songsPlayCountMap.get(song));
+				testSongMap.put(song, songMap.get(song));
+			}
+			
+			tuneListeningHistory.put(user, tuneUserPlayCountMap);
+			testListeningHistory.put(user, testUserPlayCountMap);
+		}
+		
+		DataSet tuneDataset = new DataSet(tuneListeningHistory, tuneSongMap);
+		DataSet testDataset = new DataSet(testListeningHistory, testSongMap);
+		
+		Map<String, DataSet> datasetsMap = Maps.newHashMap();
+		datasetsMap.put(Constants.TUNE_DATASET, tuneDataset);
+		datasetsMap.put(Constants.TEST_DATASET, testDataset);
+		return datasetsMap;
+	}
+	
 }

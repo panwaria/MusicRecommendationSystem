@@ -24,28 +24,29 @@ public class Utility
 	public static Double getAccuracy(Map<String, List<Song>> recommendations, DataSet testDataset)
 	{
 		double overallAccuracy = 0.0;
-		for(Map.Entry<String, List<Song>> entry : recommendations.entrySet()) {
+		for (Map.Entry<String, List<Song>> entry : recommendations.entrySet())
+		{
 			String userId = entry.getKey();
 			List<Song> predictedSongs = entry.getValue();
-			Map<String, Integer> actualSongs = testDataset.getUserListeningHistory().get(userId); 
+			Map<String, Integer> actualSongs = testDataset.getUserListeningHistory().get(userId);
 
 			int totalRecommendations = predictedSongs.size();
 			int matchedSongs = 0;
-			for(Song s: predictedSongs) {
-				if(actualSongs.containsKey(s.mSongID)) {
+			for (Song s : predictedSongs)
+			{
+				if (actualSongs.containsKey(s.mSongID))
 					++matchedSongs;
-				}
 			}
-			
-			double accuracyForUser = (matchedSongs)/(double)totalRecommendations;
-			LOG.debug("Accuracy for user " + userId + " is " + accuracyForUser + 
-					" with " + matchedSongs + " matched songs ");
-			
+
+			double accuracyForUser = (matchedSongs) / (double) totalRecommendations;
+			LOG.debug("Accuracy for user " + userId + " is " + accuracyForUser + " with "
+					+ matchedSongs + " matched songs ");
+
 			overallAccuracy += accuracyForUser;
 		}
-		
+
 		int numUsers = recommendations.keySet().size();
-		return (overallAccuracy*100)/numUsers;
+		return (overallAccuracy * 100) / numUsers;
 	}
 	
 	/**

@@ -78,10 +78,10 @@ public class MusicRecommender
 		Map<String, Map<Integer, Double>> algosAccuracy = Maps.newHashMap();
 		CrossValidationFactory datasetFactory = new CrossValidationFactory(datasetTable, numCrossValidationFolds);
 
+		Map<String, Algorithm> algosToRun = getAlgorithms(numSongRecommendationPerUser);
+		
 		for(int runId = 0; runId < runs; runId++) 
 		 {
-			Map<String, Algorithm> algosToRun = getAlgorithms(numSongRecommendationPerUser);
-			
 			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets();
 			DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
 			DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
@@ -99,15 +99,13 @@ public class MusicRecommender
 			 * 2) Recommend top N songs based on the learned model.
 			 * 3) Compare the predicted songs with the actual songs listened by a test data set user.
 			 */			
-			for(Map.Entry<String, Algorithm> entry : algosToRun.entrySet()) 
+			for(Map.Entry<String, Algorithm> perAlgorithmEntry : algosToRun.entrySet()) 
 			{
-				String algoName = entry.getKey();
-				Algorithm algo = entry.getValue();
+				String algoName = perAlgorithmEntry.getKey();
+				Algorithm algo = perAlgorithmEntry.getValue();
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
-				algo.generateModel(trainDataset);
-				Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
-				double algoAccuracy = Utility.getAccuracy(recommendations, testHiddenDataset);
+				double algoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
 				
 				Map<Integer, Double> algoRunsResult = null;
@@ -139,5 +137,27 @@ public class MusicRecommender
 		}
 
 	}
-
+	
+	/**
+	 * Method to run any algorithm with a given trainDataset and testVisibleDataset. testHiddenDataset is 
+	 * used to test the accuracy of the recommendations made by the generated model of that algorithm.
+	 * 
+	 * @param algo					Learner Method
+	 * @param trainDataset			TrainDataset
+	 * @param testVisibleDataset	Test Visible Dataset (part of training dataset)
+	 * @param testHiddenDataset		Actual Test Dataset
+	 * @return						Accuracy of the generated model
+	 */
+	public static double runAlgorithm(Algorithm algo, DataSet trainDataset, 
+									  DataSet testVisibleDataset, DataSet testHiddenDataset)
+	{
+		// Generate Model
+		algo.generateModel(trainDataset);
+		
+		// Get Recommendations using generated model
+		Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
+		
+		// Test Accuracy of generated model
+		return Utility.getAccuracy(recommendations, testHiddenDataset);
+	}
 }

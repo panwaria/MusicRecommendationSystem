@@ -21,7 +21,7 @@ public class KNN implements Algorithm
 	// Number of songs to recommend for a user
 	private static int mSongsCount = 0;
 
-	private static DataSet trainDataset = null;
+	private static DataSet mTrainDataset = null;
 	
 	private static int K = 1;
 	
@@ -32,7 +32,8 @@ public class KNN implements Algorithm
 	
 	public void generateModel(DataSet trainDataset)
 	{
-		this.trainDataset = trainDataset;
+		// Do nothing but store the training dataset
+		this.mTrainDataset = trainDataset;
 	}
 
 	public Map<String, List<Song>> recommend(DataSet tuneDataset)
@@ -57,7 +58,7 @@ public class KNN implements Algorithm
 	private List<Song> getSongRecommendations(String user, DataSet tuneDataset)
 	{
 		Set<String> allSongs = Sets.newHashSet();
-		allSongs.addAll(trainDataset.getSongMap().keySet());
+		allSongs.addAll(mTrainDataset.getSongMap().keySet());
 		allSongs.addAll(tuneDataset.getSongMap().keySet());
 		List<String> allSongsList = Lists.newArrayList(allSongs);
 		
@@ -75,7 +76,7 @@ public class KNN implements Algorithm
 		Map<String, Integer> allSongsBwKUsers = Maps.newHashMap();
 		for(SimilarUser user : kNNUsers) {
 			String userName = user.userId;
-			Map<String, Integer> listeningHistory = trainDataset.getUserListeningHistory().get(userName);
+			Map<String, Integer> listeningHistory = mTrainDataset.getUserListeningHistory().get(userName);
 			for(Map.Entry<String, Integer> entry : listeningHistory.entrySet()) {
 				String songName = entry.getKey();
 				int songCount = 0;
@@ -101,7 +102,7 @@ public class KNN implements Algorithm
 			}
 		}
 		
-		Map<String, Song> trainSongMap = trainDataset.getSongMap();
+		Map<String, Song> trainSongMap = mTrainDataset.getSongMap();
 		for(SongScore songScore : topSongs) {
 			recommendations.add(trainSongMap.get(songScore.songId));
 		}
@@ -117,11 +118,11 @@ public class KNN implements Algorithm
 	 */
 	private PriorityQueue<SimilarUser> getKNNForUser(String user, DataSet tuneDataset, List<String> allSongs)
 	{
-		List<String> trainUsers = trainDataset.getListOfUsers();
+		List<String> trainUsers = mTrainDataset.getListOfUsers();
 		List<Integer> tuneFeature = getFeatureVector(user, allSongs, tuneDataset);
 		PriorityQueue<SimilarUser> kNNUsers = new PriorityQueue<KNN.SimilarUser>(K);
 		for(String trainUser : trainUsers) {
-			List<Integer> trainFeature = getFeatureVector(trainUser, allSongs, trainDataset);
+			List<Integer> trainFeature = getFeatureVector(trainUser, allSongs, mTrainDataset);
 			Double simScore = getCosineSimilarityScore(tuneFeature, trainFeature);
 			if(kNNUsers.size() < K) {
 				kNNUsers.add(new SimilarUser(trainUser, simScore));

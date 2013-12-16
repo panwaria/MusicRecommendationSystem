@@ -108,7 +108,7 @@ public class CrossValidationFactory
 	public Map<String, DataSet> getDatasets()
 	{
 		// Randomly generate a fold that would be used as the test fold.
-		int testFoldId = 1 + (int)(Math.random() * ((mDatasetFolds.size() - 1) + 1));
+		int testFoldId = (int)(Math.random() * (mDatasetFolds.size() - 1));
 		
 		Map<String, DataSet> datasets = Maps.newHashMap();
 

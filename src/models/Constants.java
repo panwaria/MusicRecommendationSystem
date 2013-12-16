@@ -26,6 +26,8 @@ public class Constants {
 	public static final String TOP_N_POPULAR 		= 	"Overall N-Popular Songs Algorithm";
 	public static final String K_NEAREST_NEIGHBOUR 	= 	"K-Nearest Neighbours Algorithm";
 	public static final String NAIVE_BAYES 			= 	"Naive Bayes Algorithm";
+	public static final String USER_BASED_COLLABORATIVE_FILTERING = "User based collaborative filtering algorithm";
+	public static final String ITEM_BASED_COLLABORATIVE_FILTERING = "Item based collaborative filtering algorithm";
 	
 	// Dataset
 	public static final String TRAIN_DATASET 			= "train";

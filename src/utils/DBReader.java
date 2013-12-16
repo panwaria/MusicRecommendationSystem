@@ -44,7 +44,7 @@ public class DBReader {
 		}
 		
 		if(dbConn != null) {
-			System.out.println("Connected to the MySQL database ..");
+			//System.out.println("Connected to the MySQL database ..");
 		}
 		else {
 			throw new RuntimeException("Failed to connect to the MySQL database ..");
@@ -61,7 +61,7 @@ public class DBReader {
 	{
 		try {
 			dbConn.close();
-			System.out.println("Closed db connection ..");
+			//System.out.println("Closed db connection ..");
 		} catch (SQLException e) {
 			System.err.println("Failed to close connection to the MySQL database ..");
 			e.printStackTrace();
@@ -114,7 +114,7 @@ public class DBReader {
 				if(songIdToObjMap.containsKey(songId)) 
 				{
 					song = songIdToObjMap.get(songId);
-					listenersList = song.getmListenersList();
+					listenersList = song.getListenersList();
 				}
 				else 
 				{
@@ -124,8 +124,8 @@ public class DBReader {
 				
 				listenersList.add(userId);
 				
-				song.setmSongID(songId);
-				song.setmListenersList(listenersList);
+				song.setSongID(songId);
+				song.setListenersList(listenersList);
 				
 				songIdToObjMap.put(songId, song);
 			}			

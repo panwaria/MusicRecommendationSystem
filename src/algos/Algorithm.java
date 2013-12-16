@@ -21,6 +21,6 @@ public interface Algorithm
 	 * Method to give recommendations.
 	 * @return	Map of each user with recommended N popular songs
 	 */
-	public Map<String, List<Song>> recommend(DataSet testSet);
+	public Map<String, List<Song>> recommend(DataSet testVisibleDataset);
 
 }

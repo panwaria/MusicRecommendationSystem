@@ -13,6 +13,7 @@ import algos.KNN;
 import algos.NaiveBayes;
 import algos.TopNPopularSongs;
 import algos.UserBasedCollaborativeFiltering;
+import algos.ensembles.Bagging;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
@@ -38,11 +39,13 @@ public class MusicRecommender
 		Algorithm naiveBayesAlgo 		= new NaiveBayes(recommendationCount);
 		Algorithm userBasedCollabFiltering = new UserBasedCollaborativeFiltering(recommendationCount);
 		Algorithm itemBasedCollabFiltering = new ItemBasedCollaborativeFiltering(recommendationCount);
-
+		Algorithm baggingWithNaiveBayes = new Bagging(Constants.NAIVE_BAYES, recommendationCount);
+		
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
 		algosMap.put(Constants.USER_BASED_COLLABORATIVE_FILTERING, userBasedCollabFiltering);
 		algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
+		algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
 		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
 		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		

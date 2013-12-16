@@ -3,14 +3,12 @@ package utils.data;
 import java.util.List;
 import java.util.Map;
 
-import utils.DBReader;
+import models.Constants;
+import models.DataSet;
+import models.Song;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import models.DataSet;
-import models.Song;
-import models.Constants;
 
 /**
  * Utility class that generated cross-validation folds with a base dataset.

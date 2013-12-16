@@ -25,6 +25,8 @@ public class DataSet
 	
 	private int mDataSetSize = -1;
 	
+	private List<Song> overallNPopularSongs = null;
+	
 	public DataSet(Map<String, Map<String, Integer>> mUserListeningHistory,
 			Map<String, Song> mSongMap)
 	{
@@ -106,6 +108,10 @@ public class DataSet
 	 */
 	public List<Song> getOverallNPopularSongs(int N)
 	{
+		if(overallNPopularSongs != null && !overallNPopularSongs.isEmpty()) {
+			return overallNPopularSongs;
+		}
+		
 		LOG.debug("Calculating the " + N + " most popular songs in the dataset ..");
 		PriorityQueue<SongFrequency> topSongs = new PriorityQueue<DataSet.SongFrequency>(N);
 		for(Map.Entry<String, Song> entry : mSongMap.entrySet()) {
@@ -126,7 +132,7 @@ public class DataSet
 			}
 		}
 
-		List<Song> overallNPopularSongs = Lists.newArrayList();
+		overallNPopularSongs = Lists.newArrayList();
 		for(SongFrequency songFreq : topSongs) {
 			overallNPopularSongs.add(mSongMap.get(songFreq.songId));
 		}

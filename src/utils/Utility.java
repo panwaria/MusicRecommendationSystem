@@ -3,10 +3,10 @@ package utils;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import models.DataSet;
-import models.Song;
+import models.SongScore;
+
+import org.apache.log4j.Logger;
 
 /**
  * Class with basic utility methods.
@@ -21,18 +21,18 @@ public class Utility
 	 * @param recommendation	Map of UserID to the List of recommended songs
 	 * @return					Accuracy of the algorithm
 	 */
-	public static Double getAccuracy(Map<String, List<Song>> recommendations, DataSet testDataset)
+	public static Double getAccuracy(Map<String, List<SongScore>> recommendations, DataSet testDataset)
 	{
 		double overallAccuracy = 0.0;
-		for(Map.Entry<String, List<Song>> entry : recommendations.entrySet()) {
+		for(Map.Entry<String, List<SongScore>> entry : recommendations.entrySet()) {
 			String userId = entry.getKey();
-			List<Song> predictedSongs = entry.getValue();
+			List<SongScore> predictedSongs = entry.getValue();
 			Map<String, Integer> actualSongs = testDataset.getmUserListeningHistory().get(userId); 
 
 			int totalRecommendations = predictedSongs.size();
 			int matchedSongs = 0;
-			for(Song s: predictedSongs) {
-				if(actualSongs.containsKey(s.mSongID)) {
+			for(SongScore s: predictedSongs) {
+				if(actualSongs.containsKey(s.getSong())) {
 					++matchedSongs;
 				}
 			}

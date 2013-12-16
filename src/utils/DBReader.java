@@ -45,7 +45,7 @@ public class DBReader {
 		}
 		
 		if(dbConn != null) {
-			System.out.println("Connected to the MySQL database ..");
+			//System.out.println("Connected to the MySQL database ..");
 		}
 		else {
 			throw new RuntimeException("Failed to connect to the MySQL database ..");
@@ -62,7 +62,7 @@ public class DBReader {
 	{
 		try {
 			dbConn.close();
-			System.out.println("Closed db connection ..");
+			//System.out.println("Closed db connection ..");
 		} catch (SQLException e) {
 			System.err.println("Failed to close connection to the MySQL database ..");
 			e.printStackTrace();

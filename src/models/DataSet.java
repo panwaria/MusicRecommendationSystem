@@ -106,6 +106,31 @@ public class DataSet
 		return overallNPopularSongs;
 	}
 	
+	/**
+	 * Get all the songs listened by a user.
+	 * @param user
+	 * @return
+	 */
+	public List<String> getSongsForUser(String user)
+	{
+		if(mUserListeningHistory.containsKey(user)) {
+			return Lists.newArrayList(mUserListeningHistory.get(user).keySet());
+		}
+		return Lists.newArrayList();
+	}
+	
+	/**
+	 * Get all the users who have listened to a song
+	 * @return
+	 */
+	public List<String> getUsersForSong(String song)
+	{
+		if(mSongMap.containsKey(song)) {
+			return mSongMap.get(song).mListenersList;
+		}
+		return Lists.newArrayList();
+	}
+	
 	private class SongFrequency implements Comparable
 	{
 		String songId;

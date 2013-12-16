@@ -2,11 +2,12 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
+import models.Constants;
+import models.DataSet;
+import models.SongScore;
+
 import org.apache.log4j.Logger;
 
-import models.DataSet;
-import models.Song;
-import models.Constants;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
 import algos.Algorithm;
@@ -99,7 +100,7 @@ public class MusicRecommender {
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
 				algo.generateModel(trainDataset);
-				Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
+				Map<String, List<SongScore>> recommendations = algo.recommend(testVisibleDataset);
 				double algoAccuracy = Utility.getAccuracy(recommendations, testHiddenDataset);
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
 				

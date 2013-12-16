@@ -38,7 +38,7 @@ public class MusicRecommender
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
 		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
-		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
+		algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		
 		return algosMap;
 	

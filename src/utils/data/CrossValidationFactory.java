@@ -108,12 +108,12 @@ public class CrossValidationFactory
 	public Map<String, DataSet> getDatasets()
 	{
 		// Randomly generate a fold that would be used as the test fold.
-		int testFoldId = 1 + (int)(Math.random() * ((mDatasetFolds.size() - 1) + 1));
+		int testFoldId = (int)(Math.random() * (mDatasetFolds.size() - 1));
 		
 		Map<String, DataSet> datasets = Maps.newHashMap();
 
-		DataSet dataset = mDatasetFolds.get(testFoldId);
-		datasets.putAll(getTestTuneDataset(dataset));
+		DataSet testDataset = mDatasetFolds.get(testFoldId);
+		datasets.putAll(getHiddenAndVisibleTestDataset(testDataset));
 		
 		Map<String, Map<String, Integer>> trainListeningHistory = Maps.newHashMap();
 		Map<String, Song> trainSongMap = Maps.newHashMap();
@@ -136,15 +136,15 @@ public class CrossValidationFactory
 	}
 	
 	/**
-	 * The basic idea is to divide the dataset into two parts - one which would be used for tuning
-	 * (contains half listening history of a user) and the other would be used for testing the
-	 * efficiency of the algorithm.
+	 * The basic idea is to divide the test dataset into two parts - one which would be used with 
+	 * training dataset for learning (contains half listening history of a user) and the other would
+	 * be used for testing the efficiency of the algorithm.
 	 * 
 	 * For a user X, if total number of songs is N :
-	 * Tune dataset would contain : (N/2)+1 songs
-	 * Test dataset would contain : (N/2) songs
+	 * Test(Visible) dataset would contain : (N/2)+1 songs
+	 * Test(Hidden) dataset would contain : (N/2) songs
 	 */
-	private static Map<String, DataSet> getTestTuneDataset(DataSet dataset)
+	private static Map<String, DataSet> getHiddenAndVisibleTestDataset(DataSet dataset)
 	{
 		Map<String, Map<String, Integer>> listeningHistory = dataset.getUserListeningHistory();
 		Map<String, Song> songMap = dataset.getSongMap();

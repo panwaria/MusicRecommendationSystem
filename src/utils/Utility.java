@@ -38,26 +38,27 @@ public class Utility {
 	public static Double getAccuracy(Map<String, List<Song>> recommendations, DataSet testDataset) 
 	{
 		double overallAccuracy = 0.0;
-		for (Map.Entry<String, List<Song>> entry : recommendations.entrySet()) {
-			String userId = entry.getKey();
-			List<Song> predictedSongs = entry.getValue();
+		for (Map.Entry<String, List<Song>> perUserEntry : recommendations.entrySet()) 
+		{
+			String userId = perUserEntry.getKey();
+			List<Song> predictedSongs = perUserEntry.getValue();
+			
 			Map<String, Integer> actualSongs = testDataset.getUserListeningHistory().get(userId);
 
 			int totalRecommendations = predictedSongs.size();
 			int matchedSongs = 0;
-			for (Song s : predictedSongs) {
-				if (actualSongs.containsKey(s.getSongID())) {
+			for (Song s : predictedSongs)
+			{
+				if (actualSongs.containsKey(s.getSongID()))
 					++matchedSongs;
-				}
-
-				double accuracyForUser = (matchedSongs)/ (double) totalRecommendations;
-				LOG.debug("Accuracy for user " + userId + " is "
-						+ accuracyForUser + " with " + matchedSongs
-						+ " matched songs ");
-
-				overallAccuracy += accuracyForUser;
 			}
+			
+			double accuracyForUser = (matchedSongs)/ (double) totalRecommendations;
+			LOG.debug("Accuracy for user " + userId + " is "
+					+ accuracyForUser + " with " + matchedSongs
+					+ " matched songs ");
 
+			overallAccuracy += accuracyForUser;
 		}
 		
 		int numUsers = recommendations.keySet().size();
@@ -166,7 +167,7 @@ public class Utility {
 		return  new DataSet(trainListeningHistory, dataset.getSongMap());
 	}
 
-	public static List<String> sortHashMapByValues(Map<String, Integer> songCountMap)
+	public static List<String> sortHashMapByValues(Map<String, Integer> songCountMap, int numSongsToRecommend)
 	{
 		List<String> mapKeys = new ArrayList<String>(songCountMap.keySet());
 		List<Integer> mapValues = new ArrayList<Integer>(songCountMap.values());
@@ -183,7 +184,7 @@ public class Utility {
 		List<String> sortedList = new ArrayList<String>();
 
 		Iterator<Integer> valueIt = mapValues.iterator();
-		while (valueIt.hasNext())
+		while (valueIt.hasNext() && sortedList.size() <= numSongsToRecommend)
 		{
 			Integer val = valueIt.next();
 			Iterator<String> keyIt = mapKeys.iterator();
@@ -205,7 +206,6 @@ public class Utility {
 				}
 
 			}
-
 		}
 		return sortedList;
 	}

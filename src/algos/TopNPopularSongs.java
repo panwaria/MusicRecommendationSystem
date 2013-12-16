@@ -38,7 +38,7 @@ public class TopNPopularSongs  implements Algorithm
 		
 		LOG.debug("Most popular songs in the dataset ..");
 		for(Song s: mOverallNPopularSongs) {
-			LOG.debug("Song : " + s.mSongID + " with user count " + s.getListenersList().size());
+			LOG.debug("Song : " + s.getSongID() + " with user count " + s.getListenersList().size());
 		}
 	}
 

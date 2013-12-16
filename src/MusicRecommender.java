@@ -1,6 +1,7 @@
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import models.Constants;
 import models.DataSet;
@@ -21,6 +22,7 @@ import algos.NaiveBayes;
 import algos.TopNPopularSongs;
 import algos.UserBasedCollaborativeFiltering;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
 /**
@@ -49,7 +51,7 @@ public class MusicRecommender
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
 		algosMap.put(Constants.USER_BASED_COLLABORATIVE_FILTERING, userBasedCollabFiltering);
-		//algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
+		algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
 		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
 		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		
@@ -96,6 +98,7 @@ public class MusicRecommender
 
 		Map<String, Algorithm> overallAlgosMap = getOverallAlgorithmsMap(numSongRecommendationPerUser);
 		Map<String, Double> algosAccuracy = Maps.newHashMap();
+		Map<String, Long> algosRunTimes = Maps.newHashMap();
 		
 		for(int runId = 0; runId < runs; runId++)
 		 {
@@ -109,6 +112,7 @@ public class MusicRecommender
 			LOG.info("Test visible dataset summary for run " + runId + " is " + testVisibleDataset.getDatasetStats());
 			LOG.info("Test hidden dataset summary for run " + runId + " is " + testHiddenDataset.getDatasetStats());
 			
+
 			/**
 			 * For each recommendation algorithm do the following :
 			 * 
@@ -124,8 +128,18 @@ public class MusicRecommender
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
 				// Main Step - Generating Model + Recommending + Testing Recommendation
+				Stopwatch algoTimer = Stopwatch.createStarted();
 				double currentAlgoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
-				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(currentAlgoAccuracy) + " % ");
+				algoTimer.stop();
+				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + 
+						df.format(currentAlgoAccuracy) + " % ");
+				
+				// Logging algorithm's runtime
+				long algoRuntime = 0;
+				if(algosRunTimes.containsKey(algoName)) {
+					algoRuntime = algosRunTimes.get(algoName); 
+				}
+				algosRunTimes.put(algoName, algoRuntime + algoTimer.elapsed(TimeUnit.SECONDS));
 				
 				// Summing up Algo Accuracy
 				Double cumulativeAlgoAccuracy = 0.0;
@@ -147,7 +161,8 @@ public class MusicRecommender
 			Double sumAccuracies = algosAccuracy.get(algoName);
 			
 			double avgAccuarcy = sumAccuracies/runs;//algoRunsResult.size();
-			LOG.info("'" + algoName + "' = " + df.format(avgAccuarcy) + " % ");
+			LOG.info("'" + algoName + "' : Accuracy = " + df.format(avgAccuarcy) + " % , Time : " + 
+					algosRunTimes.get(algoName) + " seconds.");
 		}
 		LOG.info("----------------------------------------------\n");
 

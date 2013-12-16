@@ -27,6 +27,10 @@ import com.google.common.collect.Table;
  * listened songs to user X.
  * 
  * @author excelsior
+ * 
+ * TODO :
+ * 1) Need to run this algorithm repeatedly for various values of weight and normalization
+ * co-efficient parameters.
  *
  */
 public class UserBasedCollaborativeFiltering implements Algorithm

@@ -56,6 +56,7 @@ public class OptimumKNNExpt
 			double minAccuracy = 0.0;
 			for(int runId = 0; runId < JOB_RUNS; runId++)
 			 {
+				LOG.info("Running job " + (runId+1) + " for K=" + kvalue);
 				Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
 				DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
 				DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
@@ -66,6 +67,7 @@ public class OptimumKNNExpt
 				
 				double accuracy = Utility.runAlgorithm(knnAlgo, trainDataset, testVisibleDataset, 
 						testHiddenDataset);
+				LOG.info("Accuracy for K=" + kvalue + " for job " + (runId+1) + " is " + accuracy + " % ");
 				sumAccuracy += accuracy;
 				if(accuracy > maxAccuracy) {
 					maxAccuracy = accuracy;

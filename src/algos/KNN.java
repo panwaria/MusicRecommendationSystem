@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import utils.AlgoUtils;
 import models.DataSet;
 import models.Song;
 import models.SongScore;
@@ -68,6 +69,8 @@ public class KNN implements Algorithm
 		
 		for(String user : testVisibleUsers) {
 			List<Song> recommendations = getSongRecommendations(user, trainDatasetFeaturesMap, testVisibleDataset);
+			recommendations = AlgoUtils.checkAndUpdateTopNSongs(recommendations, mSongsCount, 
+					mTrainDataset.getOverallNPopularSongs(mSongsCount));
 			songRecommendationsForUserMap.put(user, recommendations);
 		}
 		

@@ -132,8 +132,12 @@ public class DataSet
 			}
 		}
 
+		/**
+		 * Ensure that the most frequent songs are stored in the decreasing order of their popularity.
+		 */
+		List<SongFrequency> topNReversedSongs = Lists.reverse(Lists.newArrayList(topSongs));
 		overallNPopularSongs = Lists.newArrayList();
-		for(SongFrequency songFreq : topSongs) {
+		for(SongFrequency songFreq : topNReversedSongs) {
 			overallNPopularSongs.add(mSongMap.get(songFreq.songId));
 		}
 		

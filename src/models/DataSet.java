@@ -23,12 +23,31 @@ public class DataSet
 	// Mapping of Song ID to Song Object: Map<SongID, Song>
 	private Map<String, Song> mSongMap = Maps.newHashMap();
 	
+	private int mDataSetSize = -1;
+	
 	public DataSet(Map<String, Map<String, Integer>> mUserListeningHistory,
 			Map<String, Song> mSongMap)
 	{
 		super();
 		this.mUserListeningHistory = mUserListeningHistory;
 		this.mSongMap = mSongMap;
+	}
+	
+	public int getDataSetSize()
+	{
+		if (mDataSetSize == -1)
+			calculateDatasetSize();
+		
+		return mDataSetSize;
+	}
+	
+	private void calculateDatasetSize()
+	{
+		mDataSetSize = 0;
+		for (Map.Entry<String, Map<String, Integer>> entry : mUserListeningHistory.entrySet())
+			mDataSetSize += entry.getValue().size();
+		
+		LOG.info("Dataset Size: " + mDataSetSize);
 	}
 
 	/**
@@ -38,7 +57,7 @@ public class DataSet
 	public String getDatasetStats()
 	{
 		StringBuilder stats = new StringBuilder();
-		stats.append("Users: ").append(mUserListeningHistory.keySet().size()).append("\t");
+		stats.append("Users: ").append(getNumberOfUsers()).append("\t");
 		stats.append("Songs: ").append(mSongMap.keySet().size());
 		
 		return stats.toString();
@@ -70,8 +89,13 @@ public class DataSet
 	 */
 	public List<String> getListOfUsers()
 	{
-		LOG.debug("No of users in dataset : " + mUserListeningHistory.keySet().size());
+		LOG.debug("No of users in dataset : " + getNumberOfUsers());
 		return Lists.newArrayList(mUserListeningHistory.keySet());
+	}
+	
+	public int getNumberOfUsers()
+	{
+		return mUserListeningHistory.keySet().size();
 	}
 	
 	/**

@@ -1,17 +1,9 @@
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import models.Constants;
 import models.DataSet;
-import models.Song;
-
 import org.apache.log4j.Logger;
-
-import models.DataSet;
-import models.Song;
-import models.Constants;
 import utils.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
@@ -21,7 +13,6 @@ import algos.KNN;
 import algos.NaiveBayes;
 import algos.TopNPopularSongs;
 import algos.UserBasedCollaborativeFiltering;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
@@ -33,7 +24,7 @@ import com.google.common.collect.Maps;
 public class MusicRecommender 
 {
 	private static DBReader mDBReader = new DBReader();
-	private DataSet mFullDataset = null;	// Entire dataset read from the database
+	private static DataSet mFullDataset = null;	// Entire dataset read from the database
 	
 	private static Logger LOG = Logger.getLogger(MusicRecommender.class);
 	
@@ -88,7 +79,7 @@ public class MusicRecommender
 				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds + 
 				", Job runs : " + runs);
 		
-		DataSet mFullDataset = mDBReader.createDataSet(dbTableName);
+		mFullDataset = mDBReader.createDataSet(dbTableName);
 		
 		// Run algorithms multiple times to get average accuracy results for different datasets
 		// using cross-validation approach.
@@ -129,7 +120,7 @@ public class MusicRecommender
 				
 				// Main Step - Generating Model + Recommending + Testing Recommendation
 				Stopwatch algoTimer = Stopwatch.createStarted();
-				double currentAlgoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
+				double currentAlgoAccuracy = Utility.runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
 				algoTimer.stop();
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + 
 						df.format(currentAlgoAccuracy) + " % ");
@@ -168,26 +159,4 @@ public class MusicRecommender
 
 	}
 	
-	/**
-	 * Method to run any algorithm with a given trainDataset and testVisibleDataset. testHiddenDataset is 
-	 * used to test the accuracy of the recommendations made by the generated model of that algorithm.
-	 * 
-	 * @param algo					Learner Method
-	 * @param trainDataset			TrainDataset
-	 * @param testVisibleDataset	Test Visible Dataset (part of training dataset)
-	 * @param testHiddenDataset		Actual Test Dataset
-	 * @return						Accuracy of the generated model
-	 */
-	public static double runAlgorithm(Algorithm algo, DataSet trainDataset, 
-									  DataSet testVisibleDataset, DataSet testHiddenDataset)
-	{
-		// Generate Model
-		algo.generateModel(trainDataset);
-		
-		// Get Recommendations using generated model
-		Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
-		
-		// Test Accuracy of generated model
-		return Utility.getAccuracy(recommendations, testHiddenDataset);
-	}
 }

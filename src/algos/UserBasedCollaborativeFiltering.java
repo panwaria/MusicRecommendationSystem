@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import models.DataSet;
+import models.Song;
+import models.SongScore;
+
 import org.apache.log4j.Logger;
 
-import models.DataSet;
-import models.SongScore;
 import utils.AlgoUtils;
 
 import com.google.common.collect.HashBasedTable;
@@ -75,13 +77,13 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 		this.trainDataset = trainSet;
 	}
 
-	public Map<String, List<SongScore>> recommend(DataSet testVisibleDataset) {
+	public Map<String, List<Song>> recommend(DataSet testVisibleDataset) {
 		LOG.info("Weight coefficient : " + getWeightCoefficient() + 
 				", Normalization coefficient : " + getNormalizationCoefficient());
 		LOG.info("TRAIN users : " + trainDataset.getListOfUsers().size() + 
 				", TEST users : " + testVisibleDataset.getListOfUsers().size());
 		
-		Map<String, List<SongScore>> recommendations = Maps.newHashMap();
+		Map<String, List<Song>> recommendations = Maps.newHashMap();
 		
 		Table<String, String, Double> userSimMatrix = getUserSimilarityMatrix(testVisibleDataset);
 		Set<String> allTrainSongs = trainDataset.getSongMap().keySet();
@@ -91,24 +93,24 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			
 			// Get the list of all the songs which the test user has currently not listened.
 			Set<String> songsToEvaluate = getUnexploredSongs(allTestUserSongs, allTrainSongs); 
-			List<SongScore> topNSongsList = Lists.newArrayList();
+			List<Song> topNSongsList = Lists.newArrayList();
 			if(songsToEvaluate.isEmpty()) {
 				recommendations.put(testUser, topNSongsList);
 				LOG.info("No songs to evaluate for test user");
 				continue;
 			}
 			
-			PriorityQueue<SongScore> topNSongs = new PriorityQueue<SongScore>(numSongsToRecommend);
+			PriorityQueue<SongScore> topNSongScores = new PriorityQueue<SongScore>(numSongsToRecommend);
 			for(String song : songsToEvaluate) {
 				// Which training set users have listened to this song ? Only these users would
 				// contribute to the overall score of this song
 				List<String> trainUsersForSong = trainDataset.getUsersForSong(song);
 				double songWeight = getSongWeight(testUser, trainUsersForSong, userSimMatrix);
-				AlgoUtils.updateTopNSongs(numSongsToRecommend, topNSongs, song, songWeight);
+				AlgoUtils.updateTopNSongs(numSongsToRecommend, topNSongScores, song, songWeight);
 			}
 			
 			// Add the best N recommendations for this user
-			topNSongsList.addAll(topNSongs);
+			topNSongsList.addAll(AlgoUtils.getTopNSongs(topNSongScores, trainDataset));
 			recommendations.put(testUser, topNSongsList);
 		}
 		
@@ -181,8 +183,8 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			}
 		}
 		
-		LOG.info("Matrix => Rows : " + userSimMatrix.rowKeySet().size() + 
-				", Columns : " + userSimMatrix.columnKeySet().size());
+		LOG.info(" Matrix => Rows : " + userSimMatrix.rowKeySet().size() + 
+				 ", Columns : " + userSimMatrix.columnKeySet().size());
 		return userSimMatrix;
 	}
 	
@@ -231,7 +233,7 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 	private double getSimScoreBwUsers(int commonSongs, int testUserSongs, int trainUserSongs)
 	{
 		double weightCoeff = getWeightCoefficient();
-		double score = (commonSongs)/
+		double score = (double)(commonSongs)/
 				(double)((Math.pow(testUserSongs, weightCoeff))*(Math.pow(trainUserSongs, 1-weightCoeff)));
 		
 		LOG.debug("Sim score for (" + commonSongs + ", " + testUserSongs + ", " + trainUserSongs + ") is " + score);

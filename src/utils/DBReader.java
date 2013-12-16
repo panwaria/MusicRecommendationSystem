@@ -114,7 +114,7 @@ public class DBReader {
 				if(songIdToObjMap.containsKey(songId)) 
 				{
 					song = songIdToObjMap.get(songId);
-					listenersList = song.getmListenersList();
+					listenersList = song.getListenersList();
 				}
 				else 
 				{
@@ -124,8 +124,8 @@ public class DBReader {
 				
 				listenersList.add(userId);
 				
-				song.setmSongID(songId);
-				song.setmListenersList(listenersList);
+				song.setSongID(songId);
+				song.setListenersList(listenersList);
 				
 				songIdToObjMap.put(songId, song);
 			}			

@@ -86,7 +86,7 @@ public class DataSet
 		PriorityQueue<SongFrequency> topSongs = new PriorityQueue<DataSet.SongFrequency>(N);
 		for(Map.Entry<String, Song> entry : mSongMap.entrySet()) {
 			String songId = entry.getKey();
-			int numUsersListened = entry.getValue().getmListenersList().size();
+			int numUsersListened = entry.getValue().getListenersList().size();
 			
 			// If the priority queue is at its max capacity, we need to evaluate if we should
 			// add the latest object or not.

@@ -13,19 +13,19 @@ public class Song
 	public String mSongID;
 	public List<String> mListenersList;		// List of users who listened to this song.
 	
-	public String getmSongID() {
+	public String getSongID() {
 		return mSongID;
 	}
 
-	public void setmSongID(String mSongID) {
+	public void setSongID(String mSongID) {
 		this.mSongID = mSongID;
 	}
 
-	public List<String> getmListenersList() {
+	public List<String> getListenersList() {
 		return mListenersList;
 	}
 
-	public void setmListenersList(List<String> mListenersList) {
+	public void setListenersList(List<String> mListenersList) {
 		this.mListenersList = mListenersList;
 	}
 

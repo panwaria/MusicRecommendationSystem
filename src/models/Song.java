@@ -10,8 +10,8 @@ import com.google.common.base.Objects;
 public class Song 
 {
 	/* Member Variables */
-	public String mSongID;
-	public List<String> mListenersList;		// List of users who listened to this song.
+	private String mSongID;
+	private List<String> mListenersList;		// List of users who listened to this song.
 	
 	public String getSongID() {
 		return mSongID;

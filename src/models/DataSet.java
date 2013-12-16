@@ -160,12 +160,12 @@ public class DataSet
 	public List<String> getUsersForSong(String song)
 	{
 		if(mSongMap.containsKey(song)) {
-			return mSongMap.get(song).mListenersList;
+			return mSongMap.get(song).getListenersList();
 		}
 		return Lists.newArrayList();
 	}
 	
-	private class SongFrequency implements Comparable
+	public class SongFrequency implements Comparable
 	{
 		String songId;
 		int numUsersListened;

@@ -111,12 +111,15 @@ public class NaiveBayes  implements Algorithm
 			String temp = pq.poll().SongName;
 			toReturn.add(mTrainDataset.getSongMap().get(temp));
 		}
-		/*
+		
+		int i = 0;
 		if(toReturn.size()<mSongsCount)
-			System.out.println("less");*/
-		int i = 30;
-		while(toReturn.size() < mSongsCount)
-			toReturn.add(mTrainDataset.getSongMap().get(allSongsList.get(i++)));
+		{
+			List<Song> topNPopular = mTrainDataset.getOverallNPopularSongs(mSongsCount);
+			while(toReturn.size() < mSongsCount)
+				toReturn.add(topNPopular.get(i++));
+		}
+		
 		return toReturn;
 	}
 

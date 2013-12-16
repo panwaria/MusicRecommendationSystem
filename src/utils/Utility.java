@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.DataSet;
-import models.SongScore;
+import models.Song;
 
 import org.apache.log4j.Logger;
 
@@ -23,18 +23,18 @@ public class Utility {
 	 *            Map of UserID to the List of recommended songs
 	 * @return Accuracy of the algorithm
 	 */
-	public static Double getAccuracy(Map<String, List<SongScore>> recommendations, DataSet testDataset) {
+	public static Double getAccuracy(Map<String, List<Song>> recommendations, DataSet testDataset) 
+	{
 		double overallAccuracy = 0.0;
-		for (Map.Entry<String, List<SongScore>> entry : recommendations
-				.entrySet()) {
+		for (Map.Entry<String, List<Song>> entry : recommendations.entrySet()) {
 			String userId = entry.getKey();
-			List<SongScore> predictedSongs = entry.getValue();
+			List<Song> predictedSongs = entry.getValue();
 			Map<String, Integer> actualSongs = testDataset.getUserListeningHistory().get(userId);
 
 			int totalRecommendations = predictedSongs.size();
 			int matchedSongs = 0;
-			for (SongScore s : predictedSongs) {
-				if (actualSongs.containsKey(s.getSong())) {
+			for (Song s : predictedSongs) {
+				if (actualSongs.containsKey(s.getSongID())) {
 					++matchedSongs;
 				}
 
@@ -47,6 +47,7 @@ public class Utility {
 			}
 
 		}
+		
 		int numUsers = recommendations.keySet().size();
 		return (overallAccuracy * 100) / numUsers;
 	}

@@ -1,7 +1,13 @@
 package utils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
+import com.google.common.collect.Lists;
+
+import models.DataSet;
+import models.Song;
 import models.SongScore;
 
 /**
@@ -33,5 +39,22 @@ public class AlgoUtils {
 				topNSongs.add(new SongScore(song, score));
 			}
 		}
+	}
+	
+	/**
+	 * Extracts the final songs to be recommended from the intermediate list of top N song scores.
+	 * @param topSongScores
+	 * @param trainDataset
+	 * @return
+	 */
+	public static List<Song> getTopNSongs(PriorityQueue<SongScore> topSongScores, DataSet trainDataset)
+	{
+		List<Song> topNSongs = Lists.newArrayList();
+		Map<String, Song> trainSongMap = trainDataset.getSongMap();
+		for(SongScore songScore : topSongScores) {
+			topNSongs.add(trainSongMap.get(songScore.getSong()));
+		}
+		
+		return topNSongs;
 	}
 }

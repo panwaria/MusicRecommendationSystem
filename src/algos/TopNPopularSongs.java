@@ -5,11 +5,9 @@ import java.util.Map;
 
 import models.DataSet;
 import models.Song;
-import models.SongScore;
 
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -40,29 +38,23 @@ public class TopNPopularSongs  implements Algorithm
 		
 		LOG.debug("Most popular songs in the dataset ..");
 		for(Song s: mOverallNPopularSongs) {
-			LOG.debug("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
+			LOG.debug("Song : " + s.mSongID + " with user count " + s.getListenersList().size());
 		}
 	}
 
 	/**
 	 * Recommend the top songs based on the overall popularity of songs in the dataset.
 	 */
-	public Map<String, List<SongScore>> recommend(DataSet testSet) 
+	public Map<String, List<Song>> recommend(DataSet testSet) 
 	{
 		List<String> allTestSetUsers = testSet.getListOfUsers();
 		if(allTestSetUsers == null || allTestSetUsers.isEmpty() || mOverallNPopularSongs == null)
 			return null;
 		
-		List<SongScore> overallPopularSongs = Lists.newArrayList();
-		for(Song song : mOverallNPopularSongs) {
-			// Assign a dummy score of 1.0 for every song to show their weights.
-			overallPopularSongs.add(new SongScore(song.getmSongID(), 1.0));
-		}
-		
 		// Recommending same set of popular songs to every user.
-		Map<String, List<SongScore>> recommendations = Maps.newHashMap();
+		Map<String, List<Song>> recommendations = Maps.newHashMap();
 		for (String userID : allTestSetUsers) 
-			recommendations.put(userID, overallPopularSongs);
+			recommendations.put(userID, mOverallNPopularSongs);
 		
 		return recommendations;
 	}

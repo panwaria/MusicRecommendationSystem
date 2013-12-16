@@ -110,6 +110,31 @@ public class DataSet
 		return overallNPopularSongs;
 	}
 	
+	/**
+	 * Get all the songs listened by a user.
+	 * @param user
+	 * @return
+	 */
+	public List<String> getSongsForUser(String user)
+	{
+		if(mUserListeningHistory.containsKey(user)) {
+			return Lists.newArrayList(mUserListeningHistory.get(user).keySet());
+		}
+		return Lists.newArrayList();
+	}
+	
+	/**
+	 * Get all the users who have listened to a song
+	 * @return
+	 */
+	public List<String> getUsersForSong(String song)
+	{
+		if(mSongMap.containsKey(song)) {
+			return mSongMap.get(song).mListenersList;
+		}
+		return Lists.newArrayList();
+	}
+	
 	private class SongFrequency implements Comparable
 	{
 		String songId;
@@ -147,38 +172,4 @@ public class DataSet
 		
 	}
 	
-	/**
-	 * Method to generate Stratified DataSets.
-	 * @return List of Stratified DataSets
-	 */
-	List<DataSet> generateStratifiedSamples()
-	{
-		// TODO: Implement.
-		return null;
-	}
-	
-	/**
-	 * Method to get top songs for a given user.
-	 * @param userID	User Identifier
-	 * @param N			Number of songs to return
-	 * @return			List of top songs listened by a given user.
-	 */
-	List<Song> getNTopSongsForUser(String userID, int N)
-	{
-		// TODO: Implement.
-		return null;
-	}
-	
-	/**
-	 * Method to get the list of top users who have listened to a given song.
-	 * @param songID	Song Identifier
-	 * @param N			Number of users to return
-	 * @return			List of top users who have listened to a given song
-	 */
-	List<Integer> getNTopUsersForSong(String songID, int N)
-	{
-		// TODO: Implement.
-		return null;
-	}
-
 }

@@ -2,6 +2,10 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
+import models.Constants;
+import models.DataSet;
+import models.SongScore;
+
 import org.apache.log4j.Logger;
 
 import models.DataSet;
@@ -14,6 +18,7 @@ import algos.Algorithm;
 import algos.KNN;
 import algos.NaiveBayes;
 import algos.TopNPopularSongs;
+import algos.UserBasedCollaborativeFiltering;
 
 import com.google.common.collect.Maps;
 
@@ -37,9 +42,11 @@ public class MusicRecommender
 		Algorithm overallTopNSongsAlgo 	= new TopNPopularSongs(recommendationCount);
 		Algorithm kNNAlgo 				= new KNN(recommendationCount) ;
 		Algorithm naiveBayesAlgo 		= new NaiveBayes(recommendationCount);
+		Algorithm userBasedCollabFiltering = new UserBasedCollaborativeFiltering(recommendationCount);
 
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
+		algosMap.put(Constants.USER_BASED_COLLABORATIVE_FILTERING, userBasedCollabFiltering);
 		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
 		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		
@@ -160,7 +167,7 @@ public class MusicRecommender
 		algo.generateModel(trainDataset);
 		
 		// Get Recommendations using generated model
-		Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
+		Map<String, List<SongScore>> recommendations = algo.recommend(testVisibleDataset);
 		
 		// Test Accuracy of generated model
 		return Utility.getAccuracy(recommendations, testHiddenDataset);

@@ -13,6 +13,10 @@ tmp/
 local.properties
 .loadpath
 
+# Have locally added these classes for testing, so escaping them.
+TestClass.java
+TestClass.class
+
 # External tool builders
 .externalToolBuilders/
 

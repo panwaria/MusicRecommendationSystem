@@ -1,24 +1,22 @@
 package algos;
 
-import java.lang.annotation.Inherited;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+
+import models.DataSet;
+import models.Song;
+import models.SongScore;
 
 import org.apache.log4j.Logger;
 
 import utils.AlgoUtils;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-
-import models.DataSet;
-import models.Song;
-import models.SongScore;
 
 /**
  * Implements in-memory item-based collaborative filtering for making best recommendations.
@@ -54,6 +52,8 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 		
 		// Song-to-song similarity matrix
 		Table<String, String, Double> songSimMatrix = getSongSimilarityMatrix(testVisibleDataset);
+		LOG.info("Sim matrix => Rows : " + songSimMatrix.rowKeySet().size() + 
+				", Columns : " + songSimMatrix.columnKeySet().size());
 		
 		Set<String> allTrainSongs = trainDataset.getSongMap().keySet();
 		PriorityQueue<SongScore> topNSongScores = new PriorityQueue<SongScore>(numSongsToRecommend);
@@ -109,13 +109,21 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 		
 		for(String testSong : testSongs) {
 			Set<String> testSongUsers = Sets.newHashSet(testSongMap.get(testSong).getListenersList());
+			PriorityQueue<SongScore> songScores = new PriorityQueue<SongScore>(numSongsToRecommend);
 			for(String trainSong : trainSongs) {
 				Set<String> trainSongUsers = Sets.newHashSet(trainSongMap.get(trainSong).getListenersList());
 				int commonUsers = getCommonUsers(testSongUsers, trainSongUsers);
 				
 				double simScore = getSimScoreBwSongs(commonUsers, testSongUsers.size(), trainSongUsers.size());
-				itemSimMatrix.put(testSong, trainSong, simScore);
+				AlgoUtils.updateTopNSongs(numSongsToRecommend, songScores, trainSong, simScore);
 			}
+			
+			// Optimization : For every test song, only retain the top N similar training songs. 
+			// Else the in-memory matrix would become very large.
+			for(SongScore songScore : songScores) {
+				itemSimMatrix.put(testSong, songScore.getSong(), songScore.getScore());
+			}
+
 		}
 		
 		return itemSimMatrix;

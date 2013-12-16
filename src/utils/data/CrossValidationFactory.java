@@ -28,8 +28,7 @@ public class CrossValidationFactory
 {
 	private DataSet mFullDataset = null;
 	private List<DataSet> mDatasetFolds = Lists.newArrayList();
-	
-	private DBReader mReader = new DBReader();
+	boolean mRandomizeFolds = false;
 	
 	/**
 	 * Initialize with the base dataset. This dataset would then be split into various chunks to
@@ -38,10 +37,11 @@ public class CrossValidationFactory
 	 * 
 	 * @param dbTableName
 	 */
-	public CrossValidationFactory(String dbTableName, int numFolds)
+	public CrossValidationFactory(DataSet fullDataset, int numFolds, boolean randomizeFolds)
 	{
-		mFullDataset = mReader.createDataSet(dbTableName);
+		mFullDataset = fullDataset;
 		createDatasetFolds(numFolds);
+		mRandomizeFolds = randomizeFolds;
 	}
 	
 	/**
@@ -105,10 +105,13 @@ public class CrossValidationFactory
 	 * @param foldId
 	 * @return
 	 */
-	public Map<String, DataSet> getDatasets()
+	public Map<String, DataSet> getDatasets(int testFoldId)
 	{
-		// Randomly generate a fold that would be used as the test fold.
-		int testFoldId = (int)(Math.random() * (mDatasetFolds.size() - 1));
+		if(mRandomizeFolds)
+		{
+			// Randomly generate a fold that would be used as the test fold.
+			testFoldId = (int)(Math.random() * (mDatasetFolds.size() - 1));
+		}		
 		
 		Map<String, DataSet> datasets = Maps.newHashMap();
 

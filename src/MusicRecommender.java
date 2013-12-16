@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import models.DataSet;
 import models.Song;
 import models.Constants;
+import utils.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
 import algos.Algorithm;
@@ -23,12 +24,14 @@ import com.google.common.collect.Maps;
  */
 public class MusicRecommender 
 {
+	private static DBReader mDBReader = new DBReader();
+	private DataSet mFullDataset = null;	// Entire dataset read from the database
 	
 	private static Logger LOG = Logger.getLogger(MusicRecommender.class);
 	
 	private static DecimalFormat df = new DecimalFormat("#.00"); 
 	
-	private static Map<String, Algorithm> getAlgorithms(int recommendationCount)
+	private static Map<String, Algorithm> getOverallAlgorithmsMap(int recommendationCount)
 	{
 		// Algorithms
 		Algorithm overallTopNSongsAlgo 	= new TopNPopularSongs(recommendationCount);
@@ -65,24 +68,28 @@ public class MusicRecommender
 			throw new IllegalArgumentException("Please run the program with correct arguments !!");
 		}
 
-		String datasetTable = args[0];
+		String dbTableName = args[0];
 		int numSongRecommendationPerUser = Integer.parseInt(args[1]);
 		int numCrossValidationFolds = Integer.parseInt(args[2]);
 		int runs = Integer.parseInt(args[3]);
-		LOG.info("Dataset Table : " + datasetTable + ", Song recommendations per user : " + 
+		LOG.info("Dataset Table : " + dbTableName + ", Song recommendations per user : " + 
 				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds + 
 				", Job runs : " + runs);
 		
+		DataSet mFullDataset = mDBReader.createDataSet(dbTableName);
+		
 		// Run algorithms multiple times to get average accuracy results for different datasets
 		// using cross-validation approach.
-		Map<String, Map<Integer, Double>> algosAccuracy = Maps.newHashMap();
-		CrossValidationFactory datasetFactory = new CrossValidationFactory(datasetTable, numCrossValidationFolds);
+		boolean randomizeFolds = (runs == numCrossValidationFolds) ? false : true;
+		CrossValidationFactory datasetFactory = 
+				new CrossValidationFactory(mFullDataset, numCrossValidationFolds, randomizeFolds);
 
-		Map<String, Algorithm> algosToRun = getAlgorithms(numSongRecommendationPerUser);
+		Map<String, Algorithm> overallAlgosMap = getOverallAlgorithmsMap(numSongRecommendationPerUser);
+		Map<String, Double> algosAccuracy = Maps.newHashMap();
 		
-		for(int runId = 0; runId < runs; runId++) 
+		for(int runId = 0; runId < runs; runId++)
 		 {
-			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets();
+			Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
 			DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
 			DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
 			DataSet testHiddenDataset = foldDatasets.get(Constants.TEST_HIDDEN_DATASET);
@@ -99,42 +106,40 @@ public class MusicRecommender
 			 * 2) Recommend top N songs based on the learned model.
 			 * 3) Compare the predicted songs with the actual songs listened by a test data set user.
 			 */			
-			for(Map.Entry<String, Algorithm> perAlgorithmEntry : algosToRun.entrySet()) 
+			for(Map.Entry<String, Algorithm> perAlgorithmEntry : overallAlgosMap.entrySet()) 
 			{
+				// Getting the algorithm
 				String algoName = perAlgorithmEntry.getKey();
 				Algorithm algo = perAlgorithmEntry.getValue();
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
-				double algoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
-				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(algoAccuracy) + " % ");
+				// Main Step - Generating Model + Recommending + Testing Recommendation
+				double currentAlgoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
+				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(currentAlgoAccuracy) + " % ");
 				
-				Map<Integer, Double> algoRunsResult = null;
+				// Summing up Algo Accuracy
+				Double cumulativeAlgoAccuracy = 0.0;
 				if(algosAccuracy.containsKey(algoName)) 
-					algoRunsResult = algosAccuracy.get(algoName);
-				else 
-					algoRunsResult = Maps.newHashMap();
-				
-				algoRunsResult.put(runId + 1, algoAccuracy);
-				algosAccuracy.put(algoName, algoRunsResult);
+					cumulativeAlgoAccuracy = algosAccuracy.get(algoName);
+				algosAccuracy.put(algoName, cumulativeAlgoAccuracy + currentAlgoAccuracy);
 			}
 		}
 		
 		// Display the aggregated results for all algorithms
 		LOG.info("\n\n");
-		LOG.info("Overall accuracy of all algorithms for recommending top " + numSongRecommendationPerUser + 
-				" songs with " + numCrossValidationFolds + "-fold cross validations approach ..");
-		for(Map.Entry<String, Map<Integer, Double>> entry : algosAccuracy.entrySet()) 
+		LOG.info("----------------------------------------------");
+		LOG.info("Overall Avg. Accuracy (NumOfRecommendations=" + numSongRecommendationPerUser + 
+				", NumOfCVFolds=" + numCrossValidationFolds + ")");
+		LOG.info("=====================\n");
+		for(Map.Entry<String, Double> perAlgoEntry : algosAccuracy.entrySet())
 		{
-			String algoName = entry.getKey();
-			Map<Integer, Double> algoRunsResult = algosAccuracy.get(algoName);
+			String algoName = perAlgoEntry.getKey();
+			Double sumAccuracies = algosAccuracy.get(algoName);
 			
-			double sumAccuracies = 0.0;
-			for(Map.Entry<Integer, Double> entry2: algoRunsResult.entrySet()) 
-				sumAccuracies += entry2.getValue();
-			
-			double avgAccuarcy = sumAccuracies/algoRunsResult.size();
-			LOG.info("Average accuracy for algorithm '" + algoName + "' is " + df.format(avgAccuarcy) + " % ");
+			double avgAccuarcy = sumAccuracies/runs;//algoRunsResult.size();
+			LOG.info("'" + algoName + "' = " + df.format(avgAccuarcy) + " % ");
 		}
+		LOG.info("----------------------------------------------\n");
 
 	}
 	

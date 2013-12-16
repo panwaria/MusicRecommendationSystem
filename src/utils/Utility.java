@@ -130,7 +130,8 @@ public class Utility {
 		// Iterate datasetSize number of times.
 		for (int i = 0; i < datasetSize; i++)
 		{
-			int randomVal = (int)Math.random() * datasetSize;
+			int randomVal = (int)(Math.random() * datasetSize);
+//			LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: randomVal = " + randomVal);
 			
 			// Pick a User
 			String pickedUser = usersList.get(randomVal % numUsers);
@@ -141,30 +142,70 @@ public class Utility {
 			if(userSongsListMap.containsKey(pickedUser))
 				userSongsList = userSongsListMap.get(pickedUser);
 			else
+			{
 				userSongsList = Lists.newArrayList(userListeningHistoryListMap.keySet());
+				userSongsListMap.put(pickedUser, userSongsList);
+			}
 
-			// Now, pick a song from this list
-			String pickedSong = userSongsList.get(randomVal * userSongsList.size());
+//			LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: pickedUser = " + pickedUser);
+					
+			// Now, pick a songID from this list
+			String pickedSongID = userSongsList.get(randomVal % userSongsList.size());
 			
 			// Find its play count
-			int pickedSongPlayCount = userListeningHistoryListMap.get(pickedSong);
+			int pickedSongPlayCount = userListeningHistoryListMap.get(pickedSongID);
 			
 			// Push this data to trainListeningHistory
 			if(trainListeningHistory.containsKey(pickedUser))
 			{
 				Map<String, Integer> songsPlayCountMap = trainListeningHistory.get(pickedUser);
-				if(!songsPlayCountMap.containsKey(pickedSong))
-					songsPlayCountMap.put(pickedSong, pickedSongPlayCount);
+				if(!songsPlayCountMap.containsKey(pickedSongID))
+					songsPlayCountMap.put(pickedSongID, pickedSongPlayCount);
+//				LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: trainListeningHistory UPDATED");
 			}
 			else
 			{
 				Map<String, Integer> songsPlayCountMap = new HashMap<String, Integer>();
-				songsPlayCountMap.put(pickedSong, pickedSongPlayCount);
+				songsPlayCountMap.put(pickedSongID, pickedSongPlayCount);
 				trainListeningHistory.put(pickedUser,songsPlayCountMap);
+//				LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: trainListeningHistory CREATED");
 			}
 		}
 		
-		return  new DataSet(trainListeningHistory, dataset.getSongMap());
+		DataSet newDataset = new DataSet(trainListeningHistory, getSongMapForListeningHistory(trainListeningHistory));
+//		LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: trainListeningHistory.size = " + trainListeningHistory.size());
+//		LOG.info("Bagging :: Utility :: getDatasetDrawnWithReplacement :: DATASET_SIZE = " + newDataset.getDataSetSize());
+		
+		return  newDataset;
+	}
+	
+	public static Map<String, Song> getSongMapForListeningHistory(Map<String, Map<String, Integer>> userListeningHistory)
+	{
+		Map<String, Song> songMap = new HashMap<String, Song>();
+		
+		for (Map.Entry<String, Map<String, Integer>> perUserEntry : userListeningHistory.entrySet())
+		{
+			String userID = perUserEntry.getKey();
+			
+			Map<String, Integer> perUserListeningHistory = perUserEntry.getValue();
+			for(String songID : perUserListeningHistory.keySet())
+			{
+				if(songMap.containsKey(songID))
+				{
+					List<String> listenersList = songMap.get(songID).getListenersList();
+					listenersList.add(userID);
+				}
+				else
+				{
+					List<String> listenersList = new ArrayList<String>();
+					listenersList.add(userID);
+					Song song = new Song(songID, listenersList);
+					songMap.put(songID, song);
+				}
+			}
+		}
+		
+		return songMap;
 	}
 
 	public static List<String> sortHashMapByValues(Map<String, Integer> songCountMap, int numSongsToRecommend)

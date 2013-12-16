@@ -1,6 +1,10 @@
 package utils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import models.Constants;
@@ -162,4 +166,47 @@ public class Utility {
 		return  new DataSet(trainListeningHistory, dataset.getSongMap());
 	}
 
+	public static List<String> sortHashMapByValues(Map<String, Integer> songCountMap)
+	{
+		List<String> mapKeys = new ArrayList<String>(songCountMap.keySet());
+		List<Integer> mapValues = new ArrayList<Integer>(songCountMap.values());
+		
+		// Sort values in descending order
+		Collections.sort(mapValues, new Comparator<Integer>()
+		{
+			public int compare(Integer arg0, Integer arg1)
+			{ return arg1.compareTo(arg0); }
+			
+		});
+		Collections.sort(mapKeys);
+
+		List<String> sortedList = new ArrayList<String>();
+
+		Iterator<Integer> valueIt = mapValues.iterator();
+		while (valueIt.hasNext())
+		{
+			Integer val = valueIt.next();
+			Iterator<String> keyIt = mapKeys.iterator();
+
+			// Finding this value in the keys
+			while (keyIt.hasNext())
+			{
+				String key = keyIt.next();
+				String comp1 = songCountMap.get(key).toString();
+				String comp2 = val.toString();
+
+				if (comp1.equals(comp2))
+				{
+					songCountMap.remove(key);
+					mapKeys.remove(key);
+
+					sortedList.add(key);
+					break;
+				}
+
+			}
+
+		}
+		return sortedList;
+	}
 }

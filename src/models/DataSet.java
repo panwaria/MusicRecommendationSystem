@@ -159,7 +159,7 @@ public class DataSet
 		return Lists.newArrayList();
 	}
 	
-	private class SongFrequency implements Comparable
+	public class SongFrequency implements Comparable
 	{
 		String songId;
 		int numUsersListened;

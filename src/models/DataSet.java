@@ -24,7 +24,8 @@ public class DataSet
 	private Map<String, Song> mSongMap = Maps.newHashMap();
 	
 	public DataSet(Map<String, Map<String, Integer>> mUserListeningHistory,
-			Map<String, Song> mSongMap) {
+			Map<String, Song> mSongMap)
+	{
 		super();
 		this.mUserListeningHistory = mUserListeningHistory;
 		this.mSongMap = mSongMap;
@@ -37,26 +38,29 @@ public class DataSet
 	public String getDatasetStats()
 	{
 		StringBuilder stats = new StringBuilder();
-		stats.append("Users : ").append(mUserListeningHistory.keySet().size()).append("\t");
-		stats.append("Songs : ").append(mSongMap.keySet().size());
+		stats.append("Users: ").append(mUserListeningHistory.keySet().size()).append("\t");
+		stats.append("Songs: ").append(mSongMap.keySet().size());
 		
 		return stats.toString();
 	}
 	
-	public Map<String, Map<String, Integer>> getmUserListeningHistory() {
-		return mUserListeningHistory;
+	public Map<String, Map<String, Integer>> getUserListeningHistory()
+	{
+		return mUserListeningHistory; 
 	}
 
-	public void setmUserListeningHistory(
-			Map<String, Map<String, Integer>> mUserListeningHistory) {
+	public void setUserListeningHistory(Map<String, Map<String, Integer>> mUserListeningHistory) 
+	{
 		this.mUserListeningHistory = mUserListeningHistory;
 	}
 
-	public Map<String, Song> getmSongMap() {
+	public Map<String, Song> getSongMap() 
+	{
 		return mSongMap;
 	}
 
-	public void setmSongMap(Map<String, Song> mSongMap) {
+	public void setSongMap(Map<String, Song> mSongMap) 
+	{
 		this.mSongMap = mSongMap;
 	}
 
@@ -168,38 +172,4 @@ public class DataSet
 		
 	}
 	
-	/**
-	 * Method to generate Stratified DataSets.
-	 * @return List of Stratified DataSets
-	 */
-	List<DataSet> generateStratifiedSamples()
-	{
-		// TODO: Implement.
-		return null;
-	}
-	
-	/**
-	 * Method to get top songs for a given user.
-	 * @param userID	User Identifier
-	 * @param N			Number of songs to return
-	 * @return			List of top songs listened by a given user.
-	 */
-	List<Song> getNTopSongsForUser(String userID, int N)
-	{
-		// TODO: Implement.
-		return null;
-	}
-	
-	/**
-	 * Method to get the list of top users who have listened to a given song.
-	 * @param songID	Song Identifier
-	 * @param N			Number of users to return
-	 * @return			List of top users who have listened to a given song
-	 */
-	List<Integer> getNTopUsersForSong(String songID, int N)
-	{
-		// TODO: Implement.
-		return null;
-	}
-
 }

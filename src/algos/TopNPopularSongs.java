@@ -38,9 +38,9 @@ public class TopNPopularSongs  implements Algorithm
 		// No model to generate here as such. We just get N popular songs from the dataset.
 		mOverallNPopularSongs = trainDataSet.getOverallNPopularSongs(mSongsCount);
 		
-		LOG.info("Most popular songs in the dataset ..");
+		LOG.debug("Most popular songs in the dataset ..");
 		for(Song s: mOverallNPopularSongs) {
-			LOG.info("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
+			LOG.debug("Song : " + s.mSongID + " with user count " + s.getmListenersList().size());
 		}
 	}
 

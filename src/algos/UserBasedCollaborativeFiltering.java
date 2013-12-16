@@ -84,7 +84,7 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 		Map<String, List<SongScore>> recommendations = Maps.newHashMap();
 		
 		Table<String, String, Double> userSimMatrix = getUserSimilarityMatrix(testVisibleDataset);
-		Set<String> allTrainSongs = trainDataset.getmSongMap().keySet();
+		Set<String> allTrainSongs = trainDataset.getSongMap().keySet();
 		
 		for(String testUser : testVisibleDataset.getListOfUsers()) {
 			Set<String> allTestUserSongs = Sets.newHashSet(testVisibleDataset.getSongsForUser(testUser));
@@ -138,7 +138,7 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 		}
 
 		if(Double.compare(weight, 0.0) > 0) {
-			LOG.info("Sim score for testuser " + testUser + " is " + weight);			
+			LOG.debug("Sim score for testuser " + testUser + " is " + weight);			
 		}
 		
 		return weight;
@@ -158,8 +158,8 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 	private Table<String, String, Double> getUserSimilarityMatrix(DataSet testVisibleDataset)
 	{
 		Table<String, String, Double> userSimMatrix = HashBasedTable.create();
-		Map<String, Map<String, Integer>> trainListeningHistory = trainDataset.getmUserListeningHistory();
-		Map<String, Map<String, Integer>> testVisibleListeningHistory = testVisibleDataset.getmUserListeningHistory();
+		Map<String, Map<String, Integer>> trainListeningHistory = trainDataset.getUserListeningHistory();
+		Map<String, Map<String, Integer>> testVisibleListeningHistory = testVisibleDataset.getUserListeningHistory();
 		
 		Set<String> testVisibleListeners = testVisibleListeningHistory.keySet();
 		Set<String> trainListeners = trainListeningHistory.keySet();

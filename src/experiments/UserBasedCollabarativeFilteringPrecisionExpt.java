@@ -68,8 +68,7 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 					userBasedCollabFilter.setWeightCoefficient(weightCoeff);
 					userBasedCollabFilter.setNormalizationCoefficient(normalizeCoeff);
 					
-					double accuracy = 
-						runAlgorithm(userBasedCollabFilter, trainDataset, testVisibleDataset, testHiddenDataset);
+					double accuracy = Utility.runAlgorithm(userBasedCollabFilter, trainDataset, testVisibleDataset, testHiddenDataset);
 					sumAccuracy += accuracy;
 					if(accuracy > maxAccuracy) {
 						maxAccuracy = accuracy;
@@ -99,27 +98,4 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 		}
 
 	}
-	
-	/**
-	 * Method to run any algorithm with a given trainDataset and testVisibleDataset. testHiddenDataset is 
-	 * used to test the accuracy of the recommendations made by the generated model of that algorithm.
-	 * 
-	 * @param algo					Learner Method
-	 * @param trainDataset			TrainDataset
-	 * @param testVisibleDataset	Test Visible Dataset (part of training dataset)
-	 * @param testHiddenDataset		Actual Test Dataset
-	 * @return						Accuracy of the generated model
-	 */
-	private static double runAlgorithm(Algorithm algo, DataSet trainDataset, 
-									  DataSet testVisibleDataset, DataSet testHiddenDataset)
-	{
-		// Generate Model
-		algo.generateModel(trainDataset);
-		
-		// Get Recommendations using generated model
-		Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
-		
-		// Test Accuracy of generated model
-		return Utility.getAccuracy(recommendations, testHiddenDataset);
-	}	
-}
+

@@ -47,7 +47,7 @@ public class MusicRecommender
 		algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
 		algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
 		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
-		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
+		algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		
 		return algosMap;
 	

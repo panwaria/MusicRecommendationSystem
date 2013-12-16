@@ -13,9 +13,10 @@ public class NaiveBayes  implements Algorithm
 {
 	int mSongsCount = 0;
 	
-	public NaiveBayes(int mSongsCount) {
+	public NaiveBayes(int numSongsToRecommend)
+	{
 		super();
-		this.mSongsCount = mSongsCount;
+		this.mSongsCount = numSongsToRecommend;
 	}
 
 	public void generateModel(DataSet trainSet) 

@@ -27,7 +27,7 @@ public class KNN implements Algorithm
 	
 	public KNN(int numSongsToRecommend)
 	{
-		this.mSongsCount = mSongsCount;
+		this.mSongsCount = numSongsToRecommend;
 	}
 	
 	public void generateModel(DataSet trainDataset)
@@ -36,16 +36,16 @@ public class KNN implements Algorithm
 		this.mTrainDataset = trainDataset;
 	}
 
-	public Map<String, List<Song>> recommend(DataSet tuneDataset)
+	public Map<String, List<Song>> recommend(DataSet testVisibleDataset)
 	{
-		List<String> tuneUsers = tuneDataset.getListOfUsers();
-		if(tuneUsers == null || tuneUsers.isEmpty()) {
+		List<String> testVisibleUsers = testVisibleDataset.getListOfUsers();
+		if(testVisibleUsers == null || testVisibleUsers.isEmpty()) {
 			return null;
 		}
 		
 		Map<String, List<Song>> songRecommendationsForUserMap = Maps.newHashMap();
-		for(String user : tuneUsers) {
-			List<Song> recommendations = getSongRecommendations(user, tuneDataset);
+		for(String user : testVisibleUsers) {
+			List<Song> recommendations = getSongRecommendations(user, testVisibleDataset);
 			songRecommendationsForUserMap.put(user, recommendations);
 		}
 		

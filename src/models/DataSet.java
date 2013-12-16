@@ -141,9 +141,9 @@ public class DataSet
 	 */
 	public List<String> getSongsForUser(String user)
 	{
-		if(mUserListeningHistory.containsKey(user)) {
+		if(mUserListeningHistory.containsKey(user)) 
 			return Lists.newArrayList(mUserListeningHistory.get(user).keySet());
-		}
+
 		return Lists.newArrayList();
 	}
 	
@@ -153,9 +153,9 @@ public class DataSet
 	 */
 	public List<String> getUsersForSong(String song)
 	{
-		if(mSongMap.containsKey(song)) {
+		if(mSongMap.containsKey(song)) 
 			return mSongMap.get(song).getListenersList();
-		}
+
 		return Lists.newArrayList();
 	}
 	

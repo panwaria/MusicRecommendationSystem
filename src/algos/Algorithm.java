@@ -23,4 +23,5 @@ public interface Algorithm
 	 */
 	public Map<String, List<Song>> recommend(DataSet testVisibleDataset);
 
+	public int numSongsToRecommend = 0;
 }

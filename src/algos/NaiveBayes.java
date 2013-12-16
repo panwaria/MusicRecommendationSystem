@@ -65,7 +65,7 @@ public class NaiveBayes  implements Algorithm
 				Set<String> listenedSongs = testVisibleDataset.getUserListeningHistory().get(user).keySet();
 				
 				Set<String> tempSet = Sets.newHashSet();
-				for(String listener: mTrainDataset.getSongMap().get(songItem).mListenersList)
+				for(String listener: mTrainDataset.getSongMap().get(songItem).getListenersList())
 				{
 					tempSet.add(listener);
 				}
@@ -75,15 +75,15 @@ public class NaiveBayes  implements Algorithm
 					Integer countListenedSong = 0, countJointListenedAndNotListenedSong = 0, countNotListenedSong=0;
 					if(mTrainDataset.getSongMap().containsKey(listenedSong))
 					{
-						countListenedSong = mTrainDataset.getSongMap().get(listenedSong).mListenersList.size();
+						countListenedSong = mTrainDataset.getSongMap().get(listenedSong).getListenersList().size();
 					}
 					if(mTrainDataset.getSongMap().containsKey(songItem))
 					{
-						countNotListenedSong=mTrainDataset.getSongMap().get(songItem).mListenersList.size();
+						countNotListenedSong=mTrainDataset.getSongMap().get(songItem).getListenersList().size();
 					}
 					Set<String> commonUsers = Sets.newHashSet();
 					if(mTrainDataset.getSongMap().containsKey(listenedSong))
-					for(String listener: mTrainDataset.getSongMap().get(listenedSong).mListenersList)
+					for(String listener: mTrainDataset.getSongMap().get(listenedSong).getListenersList())
 					{
 						if(tempSet.contains(listener))
 						{

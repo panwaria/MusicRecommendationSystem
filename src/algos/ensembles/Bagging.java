@@ -76,6 +76,9 @@ public class Bagging implements Algorithm
 			// Main Function of Algorithm being called
 			Map<String, List<Song>> recommendations = hypo.recommend(testVisibleDataset);
 			
+			// TODO: Ideally should log some error.
+			if(recommendations == null) continue;
+			
 			// For every user
 			for(Map.Entry<String, List<Song>> perUserEntry: recommendations.entrySet())
 			{
@@ -112,7 +115,7 @@ public class Bagging implements Algorithm
 			Map<String, Integer> songCountMap = perUserEntry.getValue();
 			
 			// Get song IDs with top scores
-			List<String> recommendedSongIDs = Utility.sortHashMapByValues(songCountMap);
+			List<String> recommendedSongIDs = Utility.sortHashMapByValues(songCountMap, mNumSongsToRecommend);
 			
 			// Get songIDs for these selected songs
 			List<Song> recommendedSongs = new ArrayList<Song>();

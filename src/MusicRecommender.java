@@ -1,16 +1,8 @@
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
-
 import models.Constants;
 import models.DataSet;
-import models.Song;
-
 import org.apache.log4j.Logger;
-
-import models.DataSet;
-import models.Song;
-import models.Constants;
 import utils.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
@@ -20,7 +12,6 @@ import algos.KNN;
 import algos.NaiveBayes;
 import algos.TopNPopularSongs;
 import algos.UserBasedCollaborativeFiltering;
-
 import com.google.common.collect.Maps;
 
 /**
@@ -124,7 +115,7 @@ public class MusicRecommender
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				
 				// Main Step - Generating Model + Recommending + Testing Recommendation
-				double currentAlgoAccuracy = runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
+				double currentAlgoAccuracy = Utility.runAlgorithm(algo, trainDataset, testVisibleDataset, testHiddenDataset);
 				LOG.info("Accuracy of algo '" + algoName + "' for run " + runId + " is " + df.format(currentAlgoAccuracy) + " % ");
 				
 				// Summing up Algo Accuracy
@@ -153,26 +144,4 @@ public class MusicRecommender
 
 	}
 	
-	/**
-	 * Method to run any algorithm with a given trainDataset and testVisibleDataset. testHiddenDataset is 
-	 * used to test the accuracy of the recommendations made by the generated model of that algorithm.
-	 * 
-	 * @param algo					Learner Method
-	 * @param trainDataset			TrainDataset
-	 * @param testVisibleDataset	Test Visible Dataset (part of training dataset)
-	 * @param testHiddenDataset		Actual Test Dataset
-	 * @return						Accuracy of the generated model
-	 */
-	public static double runAlgorithm(Algorithm algo, DataSet trainDataset, 
-									  DataSet testVisibleDataset, DataSet testHiddenDataset)
-	{
-		// Generate Model
-		algo.generateModel(trainDataset);
-		
-		// Get Recommendations using generated model
-		Map<String, List<Song>> recommendations = algo.recommend(testVisibleDataset);
-		
-		// Test Accuracy of generated model
-		return Utility.getAccuracy(recommendations, testHiddenDataset);
-	}
 }

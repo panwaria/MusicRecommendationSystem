@@ -32,7 +32,7 @@ public class KNN implements Algorithm
 	private static DataSet mTrainDataset = null;
 	
 	// Number of neighbors to consider
-	private int numNeighbours = 1;
+	private int numNeighbours = 80;
 	
 	public KNN(int numSongsToRecommend)
 	{

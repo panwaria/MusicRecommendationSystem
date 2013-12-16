@@ -4,8 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import models.DataSet;
 import models.Song;
@@ -89,5 +91,24 @@ public class AlgoUtils {
 		}
 		
 		return recommendations;
+	}
+	
+	/**
+	 * Gets the list of songs from train songs which the test user has not listened.
+	 * 
+	 * @param testUserSongs
+	 * @param trainUserSongs
+	 * @return
+	 */
+	public static Set<String> getUnexploredSongs(Set<String> testUserSongs, Set<String> trainUserSongs)
+	{
+		Set<String> diffSongs = Sets.newHashSet();
+		for(String trainSong : trainUserSongs) {
+			if(!testUserSongs.contains(trainSong)) {
+				diffSongs.add(trainSong);
+			}
+		}
+		
+		return diffSongs;
 	}
 }

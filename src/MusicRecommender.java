@@ -1,10 +1,13 @@
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import models.Constants;
 import models.DataSet;
+
 import org.apache.log4j.Logger;
-import utils.DBReader;
+
+import utils.data.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
 import algos.Algorithm;
@@ -14,6 +17,7 @@ import algos.NaiveBayes;
 import algos.TopNPopularSongs;
 import algos.UserBasedCollaborativeFiltering;
 import algos.ensembles.Bagging;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
@@ -81,7 +85,7 @@ public class MusicRecommender
 			StringBuilder errorMsg = new StringBuilder();
 			errorMsg.append("Please run the program with correct arguments !!").append("\n");
 			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs>");
-			throw new IllegalArgumentException("Please run the program with correct arguments !!");
+			throw new IllegalArgumentException(errorMsg.toString());
 		}
 
 		String dbTableName = args[0];

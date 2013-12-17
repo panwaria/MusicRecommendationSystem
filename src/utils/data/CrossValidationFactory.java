@@ -147,7 +147,7 @@ public class CrossValidationFactory
 				String songName = song.getKey();
 				Song songObj = song.getValue();
 				// Add a new song and its listening history to the list
-				if(!trainSongMap.containsKey(song)) {
+				if(!trainSongMap.containsKey(songName)) {
 					trainSongMap.put(songName, songObj);
 				}
 				// Update listening history of an existing song in the map

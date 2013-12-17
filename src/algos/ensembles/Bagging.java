@@ -172,7 +172,7 @@ public class Bagging implements Algorithm
 				else
 					System.err.println("BAGGING: songID not found songID==>" + songID  + " ALGORITHM==>" + mAlgoName);
 			}
-			LOG.info("BAGGING:recommendedSongs.Size = " + recommendedSongs.size() +" ===========================");
+//			LOG.info("BAGGING:recommendedSongs.Size = " + recommendedSongs.size() +" ===========================");
 			
 			overallRecommendations.put(userID, recommendedSongs);
 		}

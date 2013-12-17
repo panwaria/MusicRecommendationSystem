@@ -124,10 +124,10 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 				int commonUsers = getCommonUsers(testSongUsers, trainSongUsers);
 				
 				double simScore = getSimScoreBwSongs(commonUsers, testSongUsers.size(), trainSongUsers.size());
-				AlgoUtils.updateTopNSongs(numSongsToRecommend, songScores, trainSong, simScore);
+				AlgoUtils.updateTopNSongs(2*numSongsToRecommend, songScores, trainSong, simScore);
 			}
 			
-			// Optimization : For every test song, only retain the top N similar training songs. 
+			// Optimization : For every test song, only retain the top 2*N similar training songs. 
 			// Else the in-memory matrix would become very large.
 			for(SongScore songScore : songScores) {
 				itemSimMatrix.put(testSong, songScore.getSong(), songScore.getScore());

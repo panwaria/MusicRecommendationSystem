@@ -1,4 +1,5 @@
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +22,7 @@ import algos.UserBasedCollaborativeFiltering;
 import algos.ensembles.Bagging;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -72,6 +74,21 @@ public class MusicRecommender
 		return algosMap;
 	}
 	
+	private static Map<String, String> getCmdLineAlgosMap()
+	{
+		Map<String, String> algosMap = Maps.newHashMap();
+		algosMap.put("overall", Constants.TOP_N_POPULAR);
+		algosMap.put("knn", Constants.K_NEAREST_NEIGHBOUR);
+		algosMap.put("user-based", Constants.USER_BASED_COLLABORATIVE_FILTERING);
+		algosMap.put("item-based", Constants.ITEM_BASED_COLLABORATIVE_FILTERING);
+		algosMap.put("nb", Constants.NAIVE_BAYES);
+		algosMap.put("bag-knn", Constants.BAGGING_KNN);
+		algosMap.put("bag-item-based", Constants.BAGGING_ITEM_BASED);
+		algosMap.put("bag-nb", Constants.BAGGING_NAIVE_BAYES);
+		
+		return algosMap;
+	}
+	
 	/**
 	 * Main method which will execute different Recommendation Algorithms and
 	 * compare their results.
@@ -85,11 +102,12 @@ public class MusicRecommender
 	{
 		// Parse the command line arguments
 
-		if(args == null || (args.length != 5)) 
+		if(args == null || (args.length < 4)) 
 		{
 			StringBuilder errorMsg = new StringBuilder();
 			errorMsg.append("Please run the program with correct arguments !!").append("\n");
-			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs> <filedata|dbdata>");
+			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs> "
+					+ "<filedata|dbdata> <overall,knn,user-based,item-based,nb,bag-knn,bag-nb,bag-item-based");
 			throw new IllegalArgumentException(errorMsg.toString());
 		}
 
@@ -98,6 +116,22 @@ public class MusicRecommender
 		int numCrossValidationFolds = Integer.parseInt(args[2]);
 		int runs = Integer.parseInt(args[3]);
 		boolean isDataReadFromFile = (args[4].equals("filedata")) ? true : false;
+		
+		// Find which algorithms to run in the current job
+		String[] algosToRun = null;
+		List<String> algosToRunList = Lists.newArrayList();
+		if(args.length == 6) {
+			algosToRun = args[5].trim().split(",");
+			Map<String, String> cmdLineAlgosMap = getCmdLineAlgosMap();
+			for(String algo : algosToRun) {
+				algosToRunList.add(cmdLineAlgosMap.get(algo.trim()));
+			}
+		}
+		// If no algo specifically specified , run all algos
+		else {
+			algosToRunList.addAll(getCmdLineAlgosMap().values());
+		}
+		LOG.info("Algorithms to run for the current run are : " + algosToRunList.toString());
 		
 		LOG.info("Dataset Table : " + dbTableName + ", Song recommendations per user : " + 
 				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds + 
@@ -148,6 +182,11 @@ public class MusicRecommender
 			{
 				// Getting the algorithm
 				String algoName = perAlgorithmEntry.getKey();
+				if(!algosToRunList.contains(algoName)) {
+					LOG.info("Skipping algorithm " + algoName);
+					continue;
+				}
+				
 				Algorithm algo = perAlgorithmEntry.getValue();
 				LOG.info("Running '" + algoName + "' recommendation algorithm for run " + runId);
 				

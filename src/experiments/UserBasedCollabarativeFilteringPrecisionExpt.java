@@ -10,7 +10,8 @@ import org.apache.log4j.Logger;
 
 import utils.Utility;
 import utils.data.CrossValidationFactory;
-import utils.data.DBReader;
+import utils.data.FileReader;
+import utils.data.Reader;
 import algos.UserBasedCollaborativeFiltering;
 
 import com.google.common.collect.HashBasedTable;
@@ -35,13 +36,14 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 	
 	private static int JOB_RUNS = 5;
 	private static int CROSS_VALIDATION_FOLDS = 10;
-	private static String DB_TABLE_NAME = "msd_test";
 	private static int NUM_SONGS_TO_RECOMMEND = 10;
 	
 	public static void main(String[] args)
 	{
-		DBReader reader = new DBReader();
-		DataSet fullDataset = reader.createDataSet(DB_TABLE_NAME);
+		String datasetName = args[0].trim();
+		
+		Reader reader = new FileReader();
+		DataSet fullDataset = reader.createDataSet(datasetName);
 		
 		CrossValidationFactory datasetFactory = 
 			new CrossValidationFactory(fullDataset, CROSS_VALIDATION_FOLDS, true);
@@ -50,6 +52,7 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 		Table<Double, Double, Double> minAccuracyTbl = HashBasedTable.create();
 		Table<Double, Double, Double> maxAccuracyTbl = HashBasedTable.create();
 		
+		LOG.info("Determining co-efficients for user-based filtering : " + datasetName);
 		for(Double weightCoeff : weightCoefficientValues) {
 			for(Double normalizeCoeff : normalizationCoefficientValues) {
 				double maxAccuracy = 0.0;

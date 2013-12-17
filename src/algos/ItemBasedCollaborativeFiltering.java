@@ -56,18 +56,25 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 				", Columns : " + songSimMatrix.columnKeySet().size());
 		
 		Set<String> allTrainSongs = trainDataset.getSongMap().keySet();
-		PriorityQueue<SongScore> topNSongScores = new PriorityQueue<SongScore>(numSongsToRecommend);
 		
 		for(String testUser : testVisibleDataset.getListOfUsers()) {
+			Set<String> testUserSongs = Sets.newHashSet(testVisibleDataset.getSongsForUser(testUser));
+			
+			/**
+			 * Only consider those songs for recommendations which have not been listened to by the
+			 * test user
+			 */
+			Set<String> songsToEvaluate = AlgoUtils.getUnexploredSongs(testUserSongs, allTrainSongs);
+			
 			/**
 			 * Calculate the score for each training song to be picked among the top N recommended songs.
 			 * Sum the score of train song column in the matrix across all the test songs rows for this
 			 * user.
 			 */
-			for(String trainSong : allTrainSongs) {
+			PriorityQueue<SongScore> topNSongScores = new PriorityQueue<SongScore>(numSongsToRecommend);			
+			for(String trainSong : songsToEvaluate) {
 				double weightTrainSong = 0.0;
-				List<String> userTestSongs = testVisibleDataset.getSongsForUser(testUser);
-				for(String testSong : userTestSongs) {
+				for(String testSong : testUserSongs) {
 					if(songSimMatrix.contains(testSong, trainSong)) {
 						weightTrainSong += songSimMatrix.get(testSong, trainSong);					
 					}
@@ -111,7 +118,7 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 		
 		for(String testSong : testSongs) {
 			Set<String> testSongUsers = Sets.newHashSet(testSongMap.get(testSong).getListenersList());
-			PriorityQueue<SongScore> songScores = new PriorityQueue<SongScore>(numSongsToRecommend);
+			PriorityQueue<SongScore> songScores = new PriorityQueue<SongScore>(2*numSongsToRecommend);
 			for(String trainSong : trainSongs) {
 				Set<String> trainSongUsers = Sets.newHashSet(trainSongMap.get(trainSong).getListenersList());
 				int commonUsers = getCommonUsers(testSongUsers, trainSongUsers);

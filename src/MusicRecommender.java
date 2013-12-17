@@ -56,17 +56,20 @@ public class MusicRecommender
 		Algorithm itemBasedCollabFiltering = new ItemBasedCollaborativeFiltering(recommendationCount);
 		
 		Algorithm baggingWithNaiveBayes = new Bagging(Constants.NAIVE_BAYES, recommendationCount);
+		Algorithm baggingWithItemBased	= new Bagging(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, recommendationCount);
+		Algorithm baggingWithKNN = new Bagging(Constants.K_NEAREST_NEIGHBOUR, recommendationCount);
 		
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
-		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
+		algosMap.put(Constants.TOP_N_POPULAR, 		overallTopNSongsAlgo);
 		algosMap.put(Constants.USER_BASED_COLLABORATIVE_FILTERING, userBasedCollabFiltering);
 		algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
-		//algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
-		algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
-		//algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
+		algosMap.put(Constants.K_NEAREST_NEIGHBOUR, kNNAlgo);
+		algosMap.put(Constants.NAIVE_BAYES, 		naiveBayesAlgo);
+		algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
+		algosMap.put(Constants.BAGGING_ITEM_BASED, 	baggingWithItemBased);
+		algosMap.put(Constants.BAGGING_ITEM_BASED, 	baggingWithItemBased);
 		
 		return algosMap;
-	
 	}
 	
 	/**

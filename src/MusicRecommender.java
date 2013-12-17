@@ -89,7 +89,7 @@ public class MusicRecommender
 		{
 			StringBuilder errorMsg = new StringBuilder();
 			errorMsg.append("Please run the program with correct arguments !!").append("\n");
-			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs>");
+			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs> <filedata|dbdata>");
 			throw new IllegalArgumentException(errorMsg.toString());
 		}
 

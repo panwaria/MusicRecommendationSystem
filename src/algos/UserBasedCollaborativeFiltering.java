@@ -28,9 +28,6 @@ import com.google.common.collect.Table;
  * 
  * @author excelsior
  * 
- * TODO :
- * 1) Need to run this algorithm repeatedly for various values of weight and normalization
- * co-efficient parameters.
  *
  */
 public class UserBasedCollaborativeFiltering implements Algorithm
@@ -42,10 +39,10 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 	
 	// Assigns weights to each user based on the number of songs he/she has listened. A user who
 	// listens to every other song should not add much to the recommendation score.
-	private double weightCoefficient = 0.2;
+	private double weightCoefficient = 0.8;
 	
 	// Maximizes the impact of high weights and minimizes the impact of low weights;
-	private double normalizationCoefficient = 0.2;
+	private double normalizationCoefficient = 8.0;
 	
 	public UserBasedCollaborativeFiltering(int numSongsToRecommend)
 	{
@@ -96,14 +93,19 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			Set<String> allTestUserSongs = Sets.newHashSet(testVisibleDataset.getSongsForUser(testUser));
 			
 			// Get the list of all the songs which the test user has currently not listened.
-			Set<String> songsToEvaluate = getUnexploredSongs(allTestUserSongs, allTrainSongs); 
-			List<Song> topNSongsList = Lists.newArrayList();
+			Set<String> songsToEvaluate = AlgoUtils.getUnexploredSongs(allTestUserSongs, allTrainSongs); 
+
+			/**
+			 * If test user has listened to all the songs by train users, just recommend the top
+			 * N overall popular songs.
+			 */
 			if(songsToEvaluate.isEmpty()) {
-				recommendations.put(testUser, topNSongsList);
+				recommendations.put(testUser, trainDataset.getOverallNPopularSongs(numSongsToRecommend));
 				LOG.info("No songs to evaluate for test user");
 				continue;
 			}
 			
+			List<Song> topNSongsList = Lists.newArrayList();
 			PriorityQueue<SongScore> topNSongScores = new PriorityQueue<SongScore>(numSongsToRecommend);
 			for(String song : songsToEvaluate) {
 				// Which training set users have listened to this song ? Only these users would
@@ -115,6 +117,8 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			
 			// Add the best N recommendations for this user
 			topNSongsList.addAll(AlgoUtils.getTopNSongs(topNSongScores, trainDataset));
+			topNSongsList = AlgoUtils.checkAndUpdateTopNSongs(topNSongsList, numSongsToRecommend, 
+					trainDataset.getOverallNPopularSongs(numSongsToRecommend));			
 			recommendations.put(testUser, topNSongsList);
 		}
 		
@@ -205,25 +209,6 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 		}
 		
 		return Sets.intersection(setA, setB).size();
-	}
-	
-	/**
-	 * Gets the list of songs from train songs which the test user has not listened.
-	 * 
-	 * @param testUserSongs
-	 * @param trainUserSongs
-	 * @return
-	 */
-	private Set<String> getUnexploredSongs(Set<String> testUserSongs, Set<String> trainUserSongs)
-	{
-		Set<String> diffSongs = Sets.newHashSet();
-		for(String trainSong : trainUserSongs) {
-			if(!testUserSongs.contains(trainSong)) {
-				diffSongs.add(trainSong);
-			}
-		}
-		
-		return diffSongs;
 	}
 	
 	/**

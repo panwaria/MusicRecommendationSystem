@@ -3,15 +3,14 @@ package experiments;
 import java.util.List;
 import java.util.Map;
 
+import models.Constants;
+import models.DataSet;
+
 import org.apache.log4j.Logger;
 
 import utils.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
-import models.Constants;
-import models.DataSet;
-import models.Song;
-import algos.Algorithm;
 import algos.UserBasedCollaborativeFiltering;
 
 import com.google.common.collect.HashBasedTable;
@@ -86,16 +85,25 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 			}
 		}
 		
+		double overallBestWeightCoeff = 0.0;
+		double overallBestNormalizeCoeff = 0.0;
+		double bestAvgAccuracy = 0.0;
 		for(Double weightCoeff : weightCoefficientValues) {
 			for(Double normalizeCoeff : normalizationCoefficientValues) {
 				double avgAcc = avgAccuracyTbl.get(weightCoeff, normalizeCoeff);
 				double minAcc = minAccuracyTbl.get(weightCoeff, normalizeCoeff);
 				double maxAcc = maxAccuracyTbl.get(weightCoeff, normalizeCoeff);
 				
+				if(avgAcc > bestAvgAccuracy) {
+					overallBestWeightCoeff = weightCoeff;
+					overallBestNormalizeCoeff = normalizeCoeff;
+				}
 				LOG.info("Coefficients : {" + weightCoeff + "," + normalizeCoeff + "} = {" + 
 						minAcc + ", " + avgAcc + ", " + maxAcc + "}");
 			}
 		}
-
+		
+		LOG.info("Best weight and normalize coeff pairs : { " + overallBestWeightCoeff + ", " + overallBestNormalizeCoeff + " } ");
 	}
 
+}

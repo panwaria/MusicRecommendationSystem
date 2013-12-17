@@ -48,6 +48,9 @@ public class OptimumKNNExpt
 		Map<Integer, Double> avgAccuracyMap = Maps.newHashMap();
 		Map<Integer, Double> maxAccuracyMap = Maps.newHashMap();
 		
+		double bestAvgAccuracy = 0.0;
+		double bestKValue = 0;
+		
 		Stopwatch timer = Stopwatch.createStarted();
 		for(Integer kvalue : kValues) {
 			LOG.info("Running experiment for K=" + kvalue);
@@ -56,6 +59,7 @@ public class OptimumKNNExpt
 			double minAccuracy = 0.0;
 			for(int runId = 0; runId < JOB_RUNS; runId++)
 			 {
+				LOG.info("Running job " + (runId+1) + " for K=" + kvalue);
 				Map<String, DataSet> foldDatasets = datasetFactory.getDatasets(runId);
 				DataSet trainDataset = foldDatasets.get(Constants.TRAIN_DATASET);
 				DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
@@ -66,6 +70,7 @@ public class OptimumKNNExpt
 				
 				double accuracy = Utility.runAlgorithm(knnAlgo, trainDataset, testVisibleDataset, 
 						testHiddenDataset);
+				LOG.info("Accuracy for K=" + kvalue + " for job " + (runId+1) + " is " + accuracy + " % ");
 				sumAccuracy += accuracy;
 				if(accuracy > maxAccuracy) {
 					maxAccuracy = accuracy;
@@ -73,16 +78,21 @@ public class OptimumKNNExpt
 				if(accuracy < minAccuracy) {
 					minAccuracy = accuracy;
 				}
+				
 			 }
 			
 			double avgAccuracy = sumAccuracy/JOB_RUNS;
+			if(avgAccuracy > bestAvgAccuracy) {
+				bestAvgAccuracy = avgAccuracy;
+				bestKValue = kvalue;
+			}
 			
 			minAccuracyMap.put(kvalue, minAccuracy);
 			avgAccuracyMap.put(kvalue, avgAccuracy);
 			maxAccuracyMap.put(kvalue, maxAccuracy);
 		}
 		
-		
+
 		// Display the aggregated results
 		for(Integer kvalue : kValues) {
 			LOG.info("K : " + kvalue + " => {" + 
@@ -93,6 +103,7 @@ public class OptimumKNNExpt
 				);
 		}
 		
+		LOG.info("Best K-value is " + bestKValue + " with best K-accuracy " + bestAvgAccuracy);
 		LOG.info("Time to run the experiment : " + timer.elapsed(TimeUnit.SECONDS) + " seconds.");
 		
 	}

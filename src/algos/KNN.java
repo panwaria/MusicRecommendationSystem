@@ -4,12 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
+import utils.AlgoUtils;
 import models.DataSet;
 import models.Song;
 import models.SongScore;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -19,13 +24,15 @@ import com.google.common.collect.Sets;
  */
 public class KNN implements Algorithm
 {
+	private static Logger LOG = Logger.getLogger(KNN.class);
+	
 	// Number of songs to recommend for a user
 	private static int mSongsCount = 0;
 
 	private static DataSet mTrainDataset = null;
 	
 	// Number of neighbors to consider
-	private int numNeighbours = 1;
+	private int numNeighbours = 80;
 	
 	public KNN(int numSongsToRecommend)
 	{
@@ -62,6 +69,8 @@ public class KNN implements Algorithm
 		
 		for(String user : testVisibleUsers) {
 			List<Song> recommendations = getSongRecommendations(user, trainDatasetFeaturesMap, testVisibleDataset);
+			recommendations = AlgoUtils.checkAndUpdateTopNSongs(recommendations, mSongsCount, 
+					mTrainDataset.getOverallNPopularSongs(mSongsCount));
 			songRecommendationsForUserMap.put(user, recommendations);
 		}
 		
@@ -74,6 +83,7 @@ public class KNN implements Algorithm
 	 */
 	private Map<String, List<Integer>> getTrainDatasetFeaturesMap(DataSet testVisibleDataset)
 	{
+		Stopwatch cacheBuildTimer = Stopwatch.createStarted();
 		Map<String, List<Integer>> trainDatasetFeaturesMap = Maps.newHashMap();
 		
 		List<String> allSongs = getAllTrainTestSongs(testVisibleDataset);
@@ -83,6 +93,7 @@ public class KNN implements Algorithm
 			trainDatasetFeaturesMap.put(trainUser, trainFeature);
 		}
 		
+		LOG.info("Built train feature vector cache in " + cacheBuildTimer.elapsed(TimeUnit.SECONDS) + " seconds.");
 		return trainDatasetFeaturesMap;
 	}
 	

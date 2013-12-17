@@ -30,7 +30,7 @@ public class Constants {
 	public static final String ITEM_BASED_COLLABORATIVE_FILTERING = "Item based collaborative filtering algorithm";
 	public static final String BAGGING_NAIVE_BAYES 	= "Bagging (Naive Bayes) algorithm";
 	public static final String BAGGING_ITEM_BASED 	= "Bagging (Item-Based CollabFiltering) algorithm";
-	
+	public static final String BAGGING_KNN 			= "Bagging (KNN) algorithm";
 	
 	// Dataset
 	public static final String TRAIN_DATASET 			= "train";

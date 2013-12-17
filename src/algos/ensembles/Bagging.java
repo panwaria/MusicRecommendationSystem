@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import models.DataSet;
 import models.Song;
 import utils.Utility;
@@ -23,6 +24,8 @@ import algos.Algorithm;
 
 public class Bagging implements Algorithm
 {
+	private static Logger LOG = Logger.getLogger(Bagging.class);
+	
 	/* Member Variables */
 	public String mAlgoName = null;
 	public DataSet mOriginalTrainDataSet = null;
@@ -46,6 +49,16 @@ public class Bagging implements Algorithm
 	public void generateModel(DataSet trainDataset)
 	{
 		mOriginalTrainDataSet = trainDataset;
+		
+		Map<String, Song> songMap = mOriginalTrainDataSet.getSongMap();
+		for(Song s : songMap.values())
+		{
+			if(s == null)
+			{
+				System.err.println("BAGGING: generateModel :: songObject = null in Original TrainDataset!");
+				System.exit(1);
+			}
+		}
 		
 		for(int i = 0; i < NUM_ITERATIONS_BAGGING; i++)
 		{
@@ -117,10 +130,49 @@ public class Bagging implements Algorithm
 			// Get song IDs with top scores
 			List<String> recommendedSongIDs = Utility.sortHashMapByValues(new HashMap<String, Integer>(songCountMap), mNumSongsToRecommend);
 			
+			
+//			Map<String, Song> songMap = mOriginalTrainDataSet.getSongMap();
+//			for(Song s : songMap.values())
+//			{
+//				if(s == null)
+//				{
+//					System.err.println("BAGGING: RECOMMEND :: songObject = null in Original TrainDataset!");
+//					System.exit(1);
+//				}
+//			}
+//			for(Map.Entry<String, Song> songEntry : mOriginalTrainDataSet.getSongMap().entrySet())
+//			{
+//				Song s = songEntry.getValue();
+//				if(s == null)
+//					System.err.println("BAGGING: RECOMMEND :: songObject = null in Original TrainDataset!");
+//			}
+			
 			// Get songIDs for these selected songs
 			List<Song> recommendedSongs = new ArrayList<Song>();
 			for(String songID : recommendedSongIDs)
-				recommendedSongs.add(mOriginalTrainDataSet.getSongMap().get(songID));
+			{
+				if(songID == null)
+					System.err.println("BAGGING: songID = null ALGORITHM==>" + mAlgoName);
+				else if(mOriginalTrainDataSet.getSongMap().containsKey(songID))
+				{
+					Song songObject = mOriginalTrainDataSet.getSongMap().get(songID);
+					if(songObject == null)
+						System.err.println("BAGGING: songObject = null in Original_TRAIN_DATASET!");
+					
+					recommendedSongs.add(songObject);
+				}
+				else if(testVisibleDataset.getSongMap().containsKey(songID))
+				{
+					Song songObject = testVisibleDataset.getSongMap().get(songID);
+					if(songObject == null)
+						System.err.println("BAGGING: songObject = null in TEST_DATASET!");
+					
+					recommendedSongs.add(songObject);
+				}
+				else
+					System.err.println("BAGGING: songID not found songID==>" + songID  + " ALGORITHM==>" + mAlgoName);
+			}
+			LOG.info("BAGGING:recommendedSongs.Size = " + recommendedSongs.size() +" ===========================");
 			
 			overallRecommendations.put(userID, recommendedSongs);
 		}

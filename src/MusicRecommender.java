@@ -59,6 +59,7 @@ public class MusicRecommender
 		Algorithm itemBasedCollabFiltering 	= new ItemBasedCollaborativeFiltering(recommendationCount);
 		Algorithm baggingWithNaiveBayes 	= new Bagging(Constants.NAIVE_BAYES, recommendationCount);
 		Algorithm baggingWithItemBased		= new Bagging(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, recommendationCount);
+		Algorithm baggingWithUserBased		= new Bagging(Constants.USER_BASED_COLLABORATIVE_FILTERING, recommendationCount);
 		Algorithm baggingWithKNN			= new Bagging(Constants.K_NEAREST_NEIGHBOUR, recommendationCount);
 		
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
@@ -70,6 +71,7 @@ public class MusicRecommender
 		algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
 		algosMap.put(Constants.BAGGING_ITEM_BASED, 	baggingWithItemBased);
 		algosMap.put(Constants.BAGGING_KNN, 		baggingWithKNN);
+		algosMap.put(Constants.BAGGING_USER_BASED, 	baggingWithUserBased);
 		
 		return algosMap;
 	}

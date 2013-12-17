@@ -2,7 +2,6 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +48,9 @@ public class Utility {
 			int matchedSongs = 0;
 			for (Song s : predictedSongs)
 			{
+				if(s == null)
+					System.err.println("UTILITTY: getAccuracy :: songObject = null");
+				
 				String songID = s.getSongID();
 				if (actualSongs.containsKey(songID))
 					++matchedSongs;
@@ -216,18 +218,15 @@ public class Utility {
 		List<Integer> mapValues = new ArrayList<Integer>(songCountMap.values());
 		
 		// Sort values in descending order
-		Collections.sort(mapValues, new Comparator<Integer>()
-		{
-			public int compare(Integer arg0, Integer arg1)
-			{ return arg1.compareTo(arg0); }
-			
-		});
+		Collections.sort(mapValues);
+		Collections.reverse(mapValues);
+		
 		Collections.sort(mapKeys);
 
 		List<String> sortedList = new ArrayList<String>();
 
 		Iterator<Integer> valueIt = mapValues.iterator();
-		while (valueIt.hasNext() && sortedList.size() <= numSongsToRecommend)
+		while (valueIt.hasNext() && sortedList.size() < numSongsToRecommend)
 		{
 			Integer val = valueIt.next();
 			Iterator<String> keyIt = mapKeys.iterator();

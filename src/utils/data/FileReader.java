@@ -20,7 +20,7 @@ import com.google.common.collect.Maps;
 public class FileReader implements Reader 
 {
 	public DataSet createDataSet(String datasetName) {
-		String csvFilePath = System.getProperty("user.dir") + "/data/" + datasetName;
+		String csvFilePath = System.getProperty("user.dir") + "/../../data/" + datasetName + ".csv";
 		
 		Map<String, Map<String, Integer>> listeningHistory = Maps.newHashMap();
 		Scanner scanner = null;

@@ -19,7 +19,7 @@ import models.Song;
 public class NaiveBayes  implements Algorithm
 {
 	int mSongsCount = 0;
-	private static DataSet mTrainDataset = null;
+	private DataSet mTrainDataset = null;
 
 	public NaiveBayes(int numSongsToRecommend)
 	{
@@ -56,6 +56,7 @@ public class NaiveBayes  implements Algorithm
 		allSongs.addAll(mTrainDataset.getSongMap().keySet());
 		List<String> allSongsList = Lists.newArrayList(allSongs);
 		PriorityQueue<recoSong> pq = new PriorityQueue<recoSong>();
+		
 		for(String songItem: allSongsList)
 		{
 			if(!testVisibleDataset.getUserListeningHistory().get(user).containsKey(songItem))
@@ -72,14 +73,15 @@ public class NaiveBayes  implements Algorithm
 
 				for(String listenedSong: listenedSongs)
 				{
-					Integer countListenedSong = 0, countJointListenedAndNotListenedSong = 0, countNotListenedSong=0;
+					int countListenedSong = 0, countJointListenedAndNotListenedSong = 0, countNotListenedSong=0;
 					if(mTrainDataset.getSongMap().containsKey(listenedSong))
 					{
 						countListenedSong = mTrainDataset.getSongMap().get(listenedSong).getListenersList().size();
+						
 					}
 					if(mTrainDataset.getSongMap().containsKey(songItem))
 					{
-						countNotListenedSong=mTrainDataset.getSongMap().get(songItem).getListenersList().size();
+						countNotListenedSong=mTrainDataset.getSongMap().get(songItem).getListenersList().size();						
 					}
 					Set<String> commonUsers = Sets.newHashSet();
 					if(mTrainDataset.getSongMap().containsKey(listenedSong))
@@ -91,7 +93,7 @@ public class NaiveBayes  implements Algorithm
 						}
 					}
 					countJointListenedAndNotListenedSong = commonUsers.size();
-					if(countListenedSong>0 && countNotListenedSong>0)
+					if(countJointListenedAndNotListenedSong>0 && countListenedSong>0 && countNotListenedSong>0)
 					{
 						logProb += Math.log((double)countJointListenedAndNotListenedSong/(double)countListenedSong/Math.pow(countNotListenedSong, alpha));
 					}
@@ -101,7 +103,7 @@ public class NaiveBayes  implements Algorithm
 				{
 					pq.offer(new recoSong(songItem,Math.pow(Math.E,logProb)));
 					while(pq.size()>mSongsCount)
-						pq.remove();
+						pq.poll();
 				}
 			}
 		}
@@ -137,13 +139,14 @@ class recoSong implements Comparable<recoSong>
 	}
 	
 	public int compareTo(recoSong other) {
-		// TODO Auto-generated method stub
-		if(this.Prob <other.Prob)
-			return -1;
-		else if(this.Prob > other.Prob)
+
+		return this.Prob.compareTo(other.Prob);
+		/*if(this.Prob <other.Prob)
 			return 1;
+		else if(this.Prob > other.Prob)
+			return -1;
 		else
-			return 0;
+			return 0;*/
 	}
 
 }

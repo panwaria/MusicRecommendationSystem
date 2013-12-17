@@ -49,7 +49,8 @@ public class Utility {
 			int matchedSongs = 0;
 			for (Song s : predictedSongs)
 			{
-				if (actualSongs.containsKey(s.getSongID()))
+				String songID = s.getSongID();
+				if (actualSongs.containsKey(songID))
 					++matchedSongs;
 			}
 			

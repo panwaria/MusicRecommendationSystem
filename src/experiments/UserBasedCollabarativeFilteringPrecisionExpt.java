@@ -34,7 +34,7 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 	private static List<Double> weightCoefficientValues = Lists.newArrayList(0.2, 0.4, 0.6, 0.8);
 	private static List<Double> normalizationCoefficientValues = Lists.newArrayList(1.0,2.0,3.0,5.0,6.0,8.0);
 	
-	private static int JOB_RUNS = 5;
+	private static int JOB_RUNS = 3;
 	private static int CROSS_VALIDATION_FOLDS = 10;
 	private static int NUM_SONGS_TO_RECOMMEND = 10;
 	
@@ -71,6 +71,7 @@ public class UserBasedCollabarativeFilteringPrecisionExpt
 					userBasedCollabFilter.setNormalizationCoefficient(normalizeCoeff);
 					
 					double accuracy = Utility.runAlgorithm(userBasedCollabFilter, trainDataset, testVisibleDataset, testHiddenDataset);
+					LOG.info("Coefficients : {" + weightCoeff + "," + normalizeCoeff + "}, Run = " + runId + ", Accuracy = " + accuracy + " % ");
 					sumAccuracy += accuracy;
 					if(accuracy > maxAccuracy) {
 						maxAccuracy = accuracy;

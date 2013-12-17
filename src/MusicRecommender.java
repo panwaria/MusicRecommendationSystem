@@ -7,9 +7,11 @@ import models.DataSet;
 
 import org.apache.log4j.Logger;
 
-import utils.data.DBReader;
 import utils.Utility;
 import utils.data.CrossValidationFactory;
+import utils.data.DBReader;
+import utils.data.FileReader;
+import utils.data.Reader;
 import algos.Algorithm;
 import algos.ItemBasedCollaborativeFiltering;
 import algos.KNN;
@@ -28,7 +30,7 @@ import com.google.common.collect.Maps;
  */
 public class MusicRecommender 
 {
-	private static DBReader mDBReader = new DBReader();
+	private static Reader mReader = null;
 	private static DataSet mFullDataset = null;	// Entire dataset read from the database
 	
 	private static Logger LOG = Logger.getLogger(MusicRecommender.class);
@@ -83,11 +85,11 @@ public class MusicRecommender
 	{
 		// Parse the command line arguments
 
-		if(args == null || (args.length != 4)) 
+		if(args == null || (args.length != 5)) 
 		{
 			StringBuilder errorMsg = new StringBuilder();
 			errorMsg.append("Please run the program with correct arguments !!").append("\n");
-			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs>");
+			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs> <filedata|dbdata>");
 			throw new IllegalArgumentException(errorMsg.toString());
 		}
 
@@ -95,11 +97,22 @@ public class MusicRecommender
 		int numSongRecommendationPerUser = Integer.parseInt(args[1]);
 		int numCrossValidationFolds = Integer.parseInt(args[2]);
 		int runs = Integer.parseInt(args[3]);
+		boolean isDataReadFromFile = (args[4].equals("filedata")) ? true : false;
+		
 		LOG.info("Dataset Table : " + dbTableName + ", Song recommendations per user : " + 
 				numSongRecommendationPerUser + ", Cross validation folds : " + numCrossValidationFolds + 
 				", Job runs : " + runs);
 		
-		mFullDataset = mDBReader.createDataSet(dbTableName);
+		// Read data from file
+		if(isDataReadFromFile) {
+			mReader = new FileReader();
+			LOG.info("Reading data from file");
+		}
+		else {
+			mReader = new DBReader();
+			LOG.info("Reading data from database");
+		}
+		mFullDataset = mReader.createDataSet(dbTableName);
 		
 		// Run algorithms multiple times to get average accuracy results for different datasets
 		// using cross-validation approach.

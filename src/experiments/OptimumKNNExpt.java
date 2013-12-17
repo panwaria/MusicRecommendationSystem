@@ -11,7 +11,8 @@ import org.apache.log4j.Logger;
 
 import utils.Utility;
 import utils.data.CrossValidationFactory;
-import utils.data.DBReader;
+import utils.data.FileReader;
+import utils.data.Reader;
 import algos.KNN;
 
 import com.google.common.base.Stopwatch;
@@ -31,15 +32,15 @@ public class OptimumKNNExpt
 	
 	private static int JOB_RUNS = 5;
 	private static int CROSS_VALIDATION_FOLDS = 10;
-	private static String DB_TABLE_NAME = "msd_test";
 	private static int NUM_SONGS_TO_RECOMMEND = 10;
 	
 	private static List<Integer> kValues = Lists.newArrayList(1, 2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
 	
 	public static void main(String[] args)
 	{
-		DBReader reader = new DBReader();
-		DataSet fullDataset = reader.createDataSet(DB_TABLE_NAME);
+		String datasetName = args[0].trim();
+		Reader reader = new FileReader();
+		DataSet fullDataset = reader.createDataSet(datasetName);
 		
 		CrossValidationFactory datasetFactory = 
 			new CrossValidationFactory(fullDataset, CROSS_VALIDATION_FOLDS, true);
@@ -51,6 +52,7 @@ public class OptimumKNNExpt
 		double bestAvgAccuracy = 0.0;
 		double bestKValue = 0;
 		
+		LOG.info("Determining optimal K for dataset : " + datasetName);
 		Stopwatch timer = Stopwatch.createStarted();
 		for(Integer kvalue : kValues) {
 			LOG.info("Running experiment for K=" + kvalue);

@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -56,5 +57,37 @@ public class AlgoUtils {
 		}
 		
 		return topNSongs;
+	}
+	
+	/**
+	 * Checks if the number of songs recommended by the algorithm is equal to required number of
+	 * recommendation songs. If it is slightly less, it picks the best songs from overall popular
+	 * songs list and appends to the set of recommendations.
+	 * @return
+	 */
+	public static List<Song> checkAndUpdateTopNSongs(List<Song> recommendations, int numSongsToRecommend, 
+													 List<Song> overallPopularSongs)
+	{
+		if(recommendations != null && recommendations.size() == numSongsToRecommend) {
+			return recommendations;
+		}
+		
+		if(recommendations == null) {
+			recommendations = Lists.newArrayList();
+		}
+		int numSongsToAdd = numSongsToRecommend - recommendations.size();
+		
+		// Start fetching the most popular songs, which have been sorted based on their overall
+		// listeners frequency.
+		for(Song song : overallPopularSongs) {
+			if(numSongsToAdd == 0) {
+				break;
+			}
+			
+			recommendations.add(song);
+			--numSongsToAdd;
+		}
+		
+		return recommendations;
 	}
 }

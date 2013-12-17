@@ -4,11 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
+import utils.AlgoUtils;
 import models.DataSet;
 import models.Song;
+import models.SongScore;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -18,16 +24,29 @@ import com.google.common.collect.Sets;
  */
 public class KNN implements Algorithm
 {
+	private static Logger LOG = Logger.getLogger(KNN.class);
+	
 	// Number of songs to recommend for a user
 	private static int mSongsCount = 0;
 
 	private static DataSet mTrainDataset = null;
 	
-	private static int K = 1;
+	// Number of neighbors to consider
+	private int numNeighbours = 1;
 	
 	public KNN(int numSongsToRecommend)
 	{
 		this.mSongsCount = numSongsToRecommend;
+	}
+	
+	public int getNumNeighbours()
+	{
+		return numNeighbours;
+	}
+	
+	public void setNumNeighbours(int numNeighbours)
+	{
+		this.numNeighbours = numNeighbours;
 	}
 	
 	public void generateModel(DataSet trainDataset)
@@ -38,14 +57,20 @@ public class KNN implements Algorithm
 
 	public Map<String, List<Song>> recommend(DataSet testVisibleDataset)
 	{
+		Map<String, List<Song>> songRecommendationsForUserMap = Maps.newHashMap();
+		
 		List<String> testVisibleUsers = testVisibleDataset.getListOfUsers();
 		if(testVisibleUsers == null || testVisibleUsers.isEmpty()) {
-			return null;
+			return songRecommendationsForUserMap;
 		}
+
+		// Cache all the train dataset features, instead of computing for every single user
+		Map<String, List<Integer>> trainDatasetFeaturesMap = getTrainDatasetFeaturesMap(testVisibleDataset);
 		
-		Map<String, List<Song>> songRecommendationsForUserMap = Maps.newHashMap();
 		for(String user : testVisibleUsers) {
-			List<Song> recommendations = getSongRecommendations(user, testVisibleDataset);
+			List<Song> recommendations = getSongRecommendations(user, trainDatasetFeaturesMap, testVisibleDataset);
+			recommendations = AlgoUtils.checkAndUpdateTopNSongs(recommendations, mSongsCount, 
+					mTrainDataset.getOverallNPopularSongs(mSongsCount));
 			songRecommendationsForUserMap.put(user, recommendations);
 		}
 		
@@ -53,16 +78,42 @@ public class KNN implements Algorithm
 	}
 	
 	/**
-	 * Get all the song recommendations for the specified user.
+	 * Cache all the train dataset features
+	 * @return
 	 */
-	private List<Song> getSongRecommendations(String user, DataSet tuneDataset)
+	private Map<String, List<Integer>> getTrainDatasetFeaturesMap(DataSet testVisibleDataset)
+	{
+		Stopwatch cacheBuildTimer = Stopwatch.createStarted();
+		Map<String, List<Integer>> trainDatasetFeaturesMap = Maps.newHashMap();
+		
+		List<String> allSongs = getAllTrainTestSongs(testVisibleDataset);
+		Set<String> trainUsers = mTrainDataset.getUserListeningHistory().keySet();
+		for(String trainUser : trainUsers) {
+			List<Integer> trainFeature = getFeatureVector(trainUser, allSongs, mTrainDataset);
+			trainDatasetFeaturesMap.put(trainUser, trainFeature);
+		}
+		
+		LOG.info("Built train feature vector cache in " + cacheBuildTimer.elapsed(TimeUnit.SECONDS) + " seconds.");
+		return trainDatasetFeaturesMap;
+	}
+	
+	private List<String> getAllTrainTestSongs(DataSet testVisibleDataset)
 	{
 		Set<String> allSongs = Sets.newHashSet();
 		allSongs.addAll(mTrainDataset.getSongMap().keySet());
-		allSongs.addAll(tuneDataset.getSongMap().keySet());
-		List<String> allSongsList = Lists.newArrayList(allSongs);
+		allSongs.addAll(testVisibleDataset.getSongMap().keySet());
+		return Lists.newArrayList(allSongs);
+	}
+	/**
+	 * Get all the song recommendations for the specified user.
+	 */
+	private List<Song> getSongRecommendations(String user, Map<String, List<Integer>> trainDatasetFeaturesMap, 
+											  DataSet testVisibleDataset)
+	{
+		List<String> allSongsList = getAllTrainTestSongs(testVisibleDataset);
 		
-		PriorityQueue<SimilarUser> kNNUsers = getKNNForUser(user, tuneDataset, allSongsList);
+		PriorityQueue<SimilarUser> kNNUsers = getKNNForUser(user, trainDatasetFeaturesMap, 
+				testVisibleDataset, allSongsList);
 		List<Song> recommendations = getSongsBasedOnKNN(kNNUsers);
 		return recommendations;
 	}
@@ -73,38 +124,41 @@ public class KNN implements Algorithm
 	private List<Song> getSongsBasedOnKNN(PriorityQueue<SimilarUser> kNNUsers)
 	{
 		List<Song> recommendations = Lists.newArrayList();
-		Map<String, Integer> allSongsBwKUsers = Maps.newHashMap();
+		
+		// Accumulate all possible song recommendations from K-neighbours
+		Map<String, Double> allSongsBwKUsers = Maps.newHashMap();
 		for(SimilarUser user : kNNUsers) {
 			String userName = user.userId;
 			Map<String, Integer> listeningHistory = mTrainDataset.getUserListeningHistory().get(userName);
 			for(Map.Entry<String, Integer> entry : listeningHistory.entrySet()) {
 				String songName = entry.getKey();
-				int songCount = 0;
+				double songScore = 0.0;
 				if(allSongsBwKUsers.containsKey(songName)) {
-					songCount = allSongsBwKUsers.get(songName);
+					songScore = allSongsBwKUsers.get(songName);
 				}
-				songCount += 1 + user.simScore;
-				allSongsBwKUsers.put(songName, songCount);
+				songScore += 1.0 + user.simScore;
+				allSongsBwKUsers.put(songName, songScore);
 			}
 		}
 
-		PriorityQueue<SongScore> topSongs = new PriorityQueue<KNN.SongScore>(mSongsCount);
-		for(Map.Entry<String, Integer> entry : allSongsBwKUsers.entrySet()) {
-			if(topSongs.size() < mSongsCount) {
-				topSongs.add(new SongScore(entry.getKey(), entry.getValue()));
+		// Retain the top N songs with the best scores.
+		PriorityQueue<SongScore> topNSongs = new PriorityQueue<SongScore>(mSongsCount);
+		for(Map.Entry<String, Double> entry : allSongsBwKUsers.entrySet()) {
+			if(topNSongs.size() < mSongsCount) {
+				topNSongs.add(new SongScore(entry.getKey(), entry.getValue()));
 			}
 			else {
-				SongScore head = topSongs.peek();
-				if(head.popularityScoreAmongKNN < entry.getValue()) {
-					topSongs.remove();
-					topSongs.add(new SongScore(entry.getKey(), entry.getValue()));
+				SongScore head = topNSongs.peek();
+				if(Double.compare(head.getScore(), entry.getValue()) < 0) {
+					topNSongs.remove();
+					topNSongs.add(new SongScore(entry.getKey(), entry.getValue()));
 				}
 			}
 		}
 		
 		Map<String, Song> trainSongMap = mTrainDataset.getSongMap();
-		for(SongScore songScore : topSongs) {
-			recommendations.add(trainSongMap.get(songScore.songId));
+		for(SongScore songScore : topNSongs) {
+			recommendations.add(trainSongMap.get(songScore.getSong()));
 		}
 		
 		return recommendations;
@@ -116,15 +170,19 @@ public class KNN implements Algorithm
 	 * This can be done by calculating the cosine distance between two users where the feature
 	 * vector is the weight of all the songs.
 	 */
-	private PriorityQueue<SimilarUser> getKNNForUser(String user, DataSet tuneDataset, List<String> allSongs)
+	private PriorityQueue<SimilarUser> getKNNForUser(String user, Map<String, List<Integer>> trainDatasetFeaturesMap, 
+													 DataSet testVisibleDataset, List<String> allSongs)
 	{
-		List<String> trainUsers = mTrainDataset.getListOfUsers();
-		List<Integer> tuneFeature = getFeatureVector(user, allSongs, tuneDataset);
-		PriorityQueue<SimilarUser> kNNUsers = new PriorityQueue<KNN.SimilarUser>(K);
-		for(String trainUser : trainUsers) {
-			List<Integer> trainFeature = getFeatureVector(trainUser, allSongs, mTrainDataset);
-			Double simScore = getCosineSimilarityScore(tuneFeature, trainFeature);
-			if(kNNUsers.size() < K) {
+		List<Integer> testFeature = getFeatureVector(user, allSongs, testVisibleDataset);
+		
+		// Maintain a priority queue to ensure that only the top K neighbors are returned for
+		// the test user.
+		PriorityQueue<SimilarUser> kNNUsers = new PriorityQueue<KNN.SimilarUser>(getNumNeighbours());
+		for(Map.Entry<String, List<Integer>> entry : trainDatasetFeaturesMap.entrySet()) {
+			String trainUser = entry.getKey();
+			List<Integer> trainFeature = entry.getValue();
+			Double simScore = getCosineSimilarityScore(testFeature, trainFeature);
+			if(kNNUsers.size() < getNumNeighbours()) {
 				kNNUsers.add(new SimilarUser(trainUser, simScore));
 			}
 			else {
@@ -133,7 +191,7 @@ public class KNN implements Algorithm
 					kNNUsers.remove(head);
 					kNNUsers.add(new SimilarUser(trainUser, simScore));
 				}
-			}
+			}			
 		}
 		
 		return kNNUsers;
@@ -160,59 +218,31 @@ public class KNN implements Algorithm
 	
 	/**
 	 * Calculate the cosine similarity between two feature vectors.
-	 * @param tuneFeature
+	 * @param testFeature
 	 * @param trainFeature
 	 * @return
 	 */
-	private Double getCosineSimilarityScore(List<Integer> tuneFeature, List<Integer> trainFeature)
+	private Double getCosineSimilarityScore(List<Integer> testFeature, List<Integer> trainFeature)
 	{
-		int cosineSim = 0;
-		for(int i=0; i < tuneFeature.size(); i++){
-			int tuneFeatValue = tuneFeature.get(i);
+		int numerator = 0;
+		int magnitudeTestValue = 0;
+		int magintudeTrainValue = 0;
+		for(int i=0; i < testFeature.size(); i++){
+			int testFeatValue = testFeature.get(i);
 			int trainFeatValue = trainFeature.get(i);
-			int diff = tuneFeatValue - trainFeatValue;
-			cosineSim += diff*diff;
+			numerator += testFeatValue*trainFeatValue;
+			magnitudeTestValue += testFeatValue*testFeatValue;
+			magintudeTrainValue += trainFeatValue*trainFeatValue;
 		}
 		
-		return Math.sqrt(cosineSim);
+		return numerator/(double)(Math.sqrt(magnitudeTestValue)*Math.sqrt(magintudeTrainValue));
 	}
 	
-	public class SongScore implements Comparable
-	{
-		String songId;
-		int popularityScoreAmongKNN;
-		
-		public SongScore(String songId, int score)
-		{
-			this.songId = songId;
-			this.popularityScoreAmongKNN = score;
-		}
-		
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (obj instanceof SongScore) {
-				SongScore that = (SongScore)obj;
-				return Objects.equal(this.songId, that.songId) &&
-						Objects.equal(this.popularityScoreAmongKNN, that.popularityScoreAmongKNN);
-			}
-			
-			return false;
-		}
-		
-		@Override
-		public int hashCode()
-		{
-			return Objects.hashCode(this.songId, this.songId);
-		}
-		
-		public int compareTo(Object obj)
-		{
-			SongScore that = (SongScore)obj;
-			return this.popularityScoreAmongKNN - that.popularityScoreAmongKNN;
-		}		
-	}
-	
+	/**
+	 * Models a similar user to the test user being investigated during K-NN processing.
+	 * @author excelsior
+	 *
+	 */
 	public class SimilarUser implements Comparable
 	{
 		String userId;

@@ -25,6 +25,8 @@ public class DataSet
 	
 	private int mDataSetSize = -1;
 	
+	private List<Song> overallNPopularSongs = null;
+	
 	public DataSet(Map<String, Map<String, Integer>> mUserListeningHistory,
 			Map<String, Song> mSongMap)
 	{
@@ -106,6 +108,10 @@ public class DataSet
 	 */
 	public List<Song> getOverallNPopularSongs(int N)
 	{
+		if(overallNPopularSongs != null && !overallNPopularSongs.isEmpty()) {
+			return overallNPopularSongs;
+		}
+		
 		LOG.debug("Calculating the " + N + " most popular songs in the dataset ..");
 		PriorityQueue<SongFrequency> topSongs = new PriorityQueue<DataSet.SongFrequency>(N);
 		for(Map.Entry<String, Song> entry : mSongMap.entrySet()) {
@@ -126,8 +132,12 @@ public class DataSet
 			}
 		}
 
-		List<Song> overallNPopularSongs = Lists.newArrayList();
-		for(SongFrequency songFreq : topSongs) {
+		/**
+		 * Ensure that the most frequent songs are stored in the decreasing order of their popularity.
+		 */
+		List<SongFrequency> topNReversedSongs = Lists.reverse(Lists.newArrayList(topSongs));
+		overallNPopularSongs = Lists.newArrayList();
+		for(SongFrequency songFreq : topNReversedSongs) {
 			overallNPopularSongs.add(mSongMap.get(songFreq.songId));
 		}
 		
@@ -141,9 +151,9 @@ public class DataSet
 	 */
 	public List<String> getSongsForUser(String user)
 	{
-		if(mUserListeningHistory.containsKey(user)) {
+		if(mUserListeningHistory.containsKey(user)) 
 			return Lists.newArrayList(mUserListeningHistory.get(user).keySet());
-		}
+
 		return Lists.newArrayList();
 	}
 	
@@ -153,9 +163,9 @@ public class DataSet
 	 */
 	public List<String> getUsersForSong(String song)
 	{
-		if(mSongMap.containsKey(song)) {
+		if(mSongMap.containsKey(song)) 
 			return mSongMap.get(song).getListenersList();
-		}
+
 		return Lists.newArrayList();
 	}
 	

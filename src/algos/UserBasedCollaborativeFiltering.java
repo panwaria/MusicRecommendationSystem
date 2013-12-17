@@ -115,6 +115,8 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			
 			// Add the best N recommendations for this user
 			topNSongsList.addAll(AlgoUtils.getTopNSongs(topNSongScores, trainDataset));
+			topNSongsList = AlgoUtils.checkAndUpdateTopNSongs(topNSongsList, numSongsToRecommend, 
+					trainDataset.getOverallNPopularSongs(numSongsToRecommend));			
 			recommendations.put(testUser, topNSongsList);
 		}
 		

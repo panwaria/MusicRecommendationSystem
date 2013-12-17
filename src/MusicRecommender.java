@@ -35,18 +35,28 @@ public class MusicRecommender
 	{
 		// Algorithms
 		Algorithm overallTopNSongsAlgo 	= new TopNPopularSongs(recommendationCount);
-		Algorithm kNNAlgo 				= new KNN(recommendationCount) ;
+		
+		// Optimum K-value was chosen by running an experiment
+		KNN kNNAlgo 				= new KNN(recommendationCount) ;
+		kNNAlgo.setNumNeighbours(80);
+		
 		Algorithm naiveBayesAlgo 		= new NaiveBayes(recommendationCount);
-		Algorithm userBasedCollabFiltering = new UserBasedCollaborativeFiltering(recommendationCount);
+		
+		// The parameters for algorithm were set by running it for different weight and normalization
+		// coefficients in an experiment.
+		UserBasedCollaborativeFiltering userBasedCollabFiltering = new UserBasedCollaborativeFiltering(recommendationCount);
+		userBasedCollabFiltering.setWeightCoefficient(0.8);
+		userBasedCollabFiltering.setNormalizationCoefficient(8.0);
 		Algorithm itemBasedCollabFiltering = new ItemBasedCollaborativeFiltering(recommendationCount);
+		
 		Algorithm baggingWithNaiveBayes = new Bagging(Constants.NAIVE_BAYES, recommendationCount);
 		
 		Map<String, Algorithm> algosMap = Maps.newHashMap();
 		algosMap.put(Constants.TOP_N_POPULAR, 				overallTopNSongsAlgo);
 		algosMap.put(Constants.USER_BASED_COLLABORATIVE_FILTERING, userBasedCollabFiltering);
 		algosMap.put(Constants.ITEM_BASED_COLLABORATIVE_FILTERING, itemBasedCollabFiltering);
-		algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
-		//algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
+		//algosMap.put(Constants.BAGGING_NAIVE_BAYES, baggingWithNaiveBayes);
+		algosMap.put(Constants.K_NEAREST_NEIGHBOUR, 		kNNAlgo);
 		algosMap.put(Constants.NAIVE_BAYES, 				naiveBayesAlgo);
 		
 		return algosMap;
@@ -101,7 +111,7 @@ public class MusicRecommender
 			DataSet testVisibleDataset = foldDatasets.get(Constants.TEST_VISIBLE_DATASET);
 			DataSet testHiddenDataset = foldDatasets.get(Constants.TEST_HIDDEN_DATASET);
 			
-			LOG.info("\n\n");
+			LOG.info("\n\n==========================================================================");
 			LOG.info("Train dataset summary for run " + runId + " is " + trainDataset.getDatasetStats());
 			LOG.info("Test visible dataset summary for run " + runId + " is " + testVisibleDataset.getDatasetStats());
 			LOG.info("Test hidden dataset summary for run " + runId + " is " + testHiddenDataset.getDatasetStats());
@@ -144,7 +154,7 @@ public class MusicRecommender
 		}
 		
 		// Display the aggregated results for all algorithms
-		LOG.info("\n\n");
+		LOG.info("\n\n=============================================================================");
 		LOG.info("----------------------------------------------");
 		LOG.info("Overall Avg. Accuracy (NumOfRecommendations=" + numSongRecommendationPerUser + 
 				", NumOfCVFolds=" + numCrossValidationFolds + ")");

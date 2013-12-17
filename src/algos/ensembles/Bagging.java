@@ -115,7 +115,7 @@ public class Bagging implements Algorithm
 			Map<String, Integer> songCountMap = perUserEntry.getValue();
 			
 			// Get song IDs with top scores
-			List<String> recommendedSongIDs = Utility.sortHashMapByValues(songCountMap, mNumSongsToRecommend);
+			List<String> recommendedSongIDs = Utility.sortHashMapByValues(new HashMap<String, Integer>(songCountMap), mNumSongsToRecommend);
 			
 			// Get songIDs for these selected songs
 			List<Song> recommendedSongs = new ArrayList<Song>();

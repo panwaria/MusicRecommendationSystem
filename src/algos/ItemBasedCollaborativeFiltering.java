@@ -77,6 +77,8 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 			}
 			
 			List<Song> topNSongs = AlgoUtils.getTopNSongs(topNSongScores, trainDataset);
+			topNSongs = AlgoUtils.checkAndUpdateTopNSongs(topNSongs, numSongsToRecommend, 
+					trainDataset.getOverallNPopularSongs(numSongsToRecommend));
 			recommendations.put(testUser, topNSongs);
 		}
 

@@ -2,15 +2,18 @@ package utils.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import utils.DBReader;
+import org.apache.log4j.Logger;
+
+import utils.Utility;
+import models.Constants;
+import models.DataSet;
+import models.Song;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import models.DataSet;
-import models.Song;
-import models.Constants;
+import com.google.common.collect.Sets;
 
 /**
  * Utility class that generated cross-validation folds with a base dataset.
@@ -26,6 +29,8 @@ import models.Constants;
  */
 public class CrossValidationFactory
 {
+	private static Logger LOG = Logger.getLogger(CrossValidationFactory.class);
+			
 	private DataSet mFullDataset = null;
 	private List<DataSet> mDatasetFolds = Lists.newArrayList();
 	boolean mRandomizeFolds = false;
@@ -42,6 +47,10 @@ public class CrossValidationFactory
 		mFullDataset = fullDataset;
 		createDatasetFolds(numFolds);
 		mRandomizeFolds = randomizeFolds;
+		
+		for(DataSet dataset : mDatasetFolds) {
+			LOG.info("Dataset fold : " + dataset.getDatasetStats());
+		}
 	}
 	
 	/**
@@ -75,20 +84,16 @@ public class CrossValidationFactory
 		
 		List<String> listeners = allListeners.subList(startId, endId);
 		Map<String, Map<String, Integer>> foldListeningHistory = Maps.newHashMap();
-		Map<String, Song> foldSongMap = Maps.newHashMap();
-		for (String listener : listeners)
-		{
+		for (String listener : listeners) {
 			Map<String, Integer> listenerSongsCount = fullListeningHistory.get(listener);
 			foldListeningHistory.put(listener, listenerSongsCount);
-			for (Map.Entry<String, Integer> entry2 : listenerSongsCount.entrySet())
-			{
-				String songName = entry2.getKey();
-				if (fullSongMap.containsKey(songName))
-				{
-					foldSongMap.put(songName, fullSongMap.get(songName));
-				}
-			}
 		}
+
+		/**
+		 * Fixed a bug here. The songs in the song map should only contain listeners from the
+		 * above partitioned listeners set, instead of all the listeners as done previously.
+		 */
+		Map<String, Song> foldSongMap = Utility.getSongMapForListeningHistory(foldListeningHistory);
 		
 		return new DataSet(foldListeningHistory, foldSongMap);
 	}
@@ -128,8 +133,36 @@ public class CrossValidationFactory
 				continue;
 			
 			DataSet fold = mDatasetFolds.get(foldId);
+			/**
+			 * Listening history is partitioned across users, so we can simply add listening history
+			 * of every fold together.
+			 */
 			trainListeningHistory.putAll(fold.getUserListeningHistory());
-			trainSongMap.putAll(fold.getSongMap());
+			
+			/**
+			 * Getting the listeners for each of the songs across the folds. Since a song might have
+			 * been listened by users across folds, we need to merge the listeners list.
+			 */
+			for(Map.Entry<String, Song> song : fold.getSongMap().entrySet()) {
+				String songName = song.getKey();
+				Song songObj = song.getValue();
+				// Add a new song and its listening history to the list
+				if(!trainSongMap.containsKey(songName)) {
+					trainSongMap.put(songName, songObj);
+				}
+				// Update listening history of an existing song in the map
+				else {
+					Song existingSongObj = trainSongMap.get(songName);
+					List<String> existingListeners = existingSongObj.getListenersList();
+					List<String> newListeners = songObj.getListenersList();
+					
+					Set<String> combinedListeners = Sets.newHashSet();
+					combinedListeners.addAll(existingListeners);
+					combinedListeners.addAll(newListeners);
+					
+					trainSongMap.put(songName, new Song(songName, Lists.newArrayList(combinedListeners)));
+				}
+			}
 		}
 		
 		DataSet trainDataset = new DataSet(trainListeningHistory, trainSongMap);

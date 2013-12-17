@@ -63,7 +63,7 @@ public class Utility {
 		}
 		
 		int numUsers = recommendations.keySet().size();
-		return (overallAccuracy * 100) / numUsers;
+		return (overallAccuracy * 100) / (double) numUsers;
 	}
 	
 	public static Algorithm getAlgorithmInstance(String algoName, int numSongsToRecommend)
@@ -195,6 +195,7 @@ public class Utility {
 				{
 					List<String> listenersList = songMap.get(songID).getListenersList();
 					listenersList.add(userID);
+					//System.out.println(songMap.get(songID).getListenersList().size());
 				}
 				else
 				{

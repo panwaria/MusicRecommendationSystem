@@ -46,7 +46,7 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 	public Map<String, List<Song>> recommend(DataSet testVisibleDataset) 
 	{
 		LOG.info("TRAIN songs : " + trainDataset.getSongMap().keySet().size() + 
-				", TEST users : " + testVisibleDataset.getSongMap().keySet().size());
+				", TEST songs : " + testVisibleDataset.getSongMap().keySet().size());
 		
 		Map<String, List<Song>> recommendations = Maps.newHashMap();
 		
@@ -114,25 +114,25 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 		Map<String, Song> trainSongMap = trainDataset.getSongMap();
 		
 		Set<String> testSongs = testSongMap.keySet();
-		Set<String> trainSongs = trainSongMap.keySet();
-		
+		Set<String> allTrainSongs = trainSongMap.keySet();
+		Set<String> trainSongsToEvaluate = AlgoUtils.getUnexploredSongs(testSongs, allTrainSongs);
+
 		for(String testSong : testSongs) {
 			Set<String> testSongUsers = Sets.newHashSet(testSongMap.get(testSong).getListenersList());
-			PriorityQueue<SongScore> songScores = new PriorityQueue<SongScore>(2*numSongsToRecommend);
-			for(String trainSong : trainSongs) {
+			for(String trainSong : trainSongsToEvaluate) {
 				Set<String> trainSongUsers = Sets.newHashSet(trainSongMap.get(trainSong).getListenersList());
 				int commonUsers = getCommonUsers(testSongUsers, trainSongUsers);
+				// Optimization : Don't add to similarity matrix, if there are no common listeners
+				// to these pair of songs.
+
+				if(commonUsers == 0) {
+					continue;
+				}
 				
 				double simScore = getSimScoreBwSongs(commonUsers, testSongUsers.size(), trainSongUsers.size());
-				AlgoUtils.updateTopNSongs(2*numSongsToRecommend, songScores, trainSong, simScore);
+				itemSimMatrix.put(testSong, trainSong, simScore);
 			}
 			
-			// Optimization : For every test song, only retain the top 2*N similar training songs. 
-			// Else the in-memory matrix would become very large.
-			for(SongScore songScore : songScores) {
-				itemSimMatrix.put(testSong, songScore.getSong(), songScore.getScore());
-			}
-
 		}
 		
 		return itemSimMatrix;
@@ -147,7 +147,9 @@ public class ItemBasedCollaborativeFiltering implements Algorithm
 			return 0;
 		}
 		
-		return Sets.intersection(setA, setB).size();
+		int commonUsers = Sets.intersection(setA, setB).size();
+		//LOG.info("Find common users between " + setA.toString() + ", " + setB.toString() + ", " + commonUsers);
+		return commonUsers;
 	}
 	
 	/**

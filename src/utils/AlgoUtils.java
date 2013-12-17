@@ -1,17 +1,16 @@
 package utils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import models.DataSet;
 import models.Song;
 import models.SongScore;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Utility functions used across algorithms.
@@ -86,11 +85,33 @@ public class AlgoUtils {
 				break;
 			}
 			
-			recommendations.add(song);
-			--numSongsToAdd;
+			// Add a new song, only if it doesn't already exist
+			if(!checkIfSongAlreadyExists(song, recommendations)) {
+				recommendations.add(song);
+				--numSongsToAdd;
+			}
 		}
 		
 		return recommendations;
+	}
+	
+	/**
+	 * Checks if a song being considered for recommendation is already present in the recommendation
+	 * set.
+	 * @param songToCheck
+	 * @param recommendations
+	 * @return
+	 */
+	private static boolean checkIfSongAlreadyExists(Song songToCheck, List<Song> recommendations)
+	{
+		boolean isPresent = false;
+		for(Song song : recommendations) {
+			if(song.equals(songToCheck)) {
+				isPresent = true;
+				break;
+			}
+		}
+		return isPresent;
 	}
 	
 	/**

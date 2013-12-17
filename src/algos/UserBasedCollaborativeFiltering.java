@@ -178,6 +178,12 @@ public class UserBasedCollaborativeFiltering implements Algorithm
 			for(String trainUser : trainListeners) {
 				Set<String> trainUserSongs = trainListeningHistory.get(trainUser).keySet();
 				int commonSongs = getCommonSongs(testUserSongs, trainUserSongs);
+				
+				// Optimization : If no common songs, there is no similarity between these users.
+				// Don't add it to the matrix as it does not have any significance.
+				if(commonSongs == 0) {
+					continue;
+				}
 				int testUserTotalSongs = testUserSongs.size();
 				int trainUserTotalSongs = trainUserSongs.size();
 				

@@ -49,7 +49,8 @@ public class Utility {
 			int matchedSongs = 0;
 			for (Song s : predictedSongs)
 			{
-				if (actualSongs.containsKey(s.getSongID()))
+				String songID = s.getSongID();
+				if (actualSongs.containsKey(songID))
 					++matchedSongs;
 			}
 			
@@ -217,7 +218,7 @@ public class Utility {
 		Collections.sort(mapValues, new Comparator<Integer>()
 		{
 			public int compare(Integer arg0, Integer arg1)
-			{ return arg1.compareTo(arg0); }
+			{ return arg0.compareTo(arg1); }
 			
 		});
 		Collections.sort(mapKeys);

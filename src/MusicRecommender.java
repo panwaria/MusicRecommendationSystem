@@ -86,6 +86,7 @@ public class MusicRecommender
 		algosMap.put("nb", Constants.NAIVE_BAYES);
 		algosMap.put("bag-knn", Constants.BAGGING_KNN);
 		algosMap.put("bag-item-based", Constants.BAGGING_ITEM_BASED);
+		algosMap.put("bag-user-based", Constants.BAGGING_USER_BASED);
 		algosMap.put("bag-nb", Constants.BAGGING_NAIVE_BAYES);
 		
 		return algosMap;
@@ -109,7 +110,7 @@ public class MusicRecommender
 			StringBuilder errorMsg = new StringBuilder();
 			errorMsg.append("Please run the program with correct arguments !!").append("\n");
 			errorMsg.append("Usage : MusicRecommender <table name> <num songs to recommend> <num cross-validation folds> <num runs> "
-					+ "<filedata|dbdata> <overall,knn,user-based,item-based,nb,bag-knn,bag-nb,bag-item-based");
+					+ "<filedata|dbdata> <overall,knn,user-based,item-based,nb,bag-knn,bag-nb,bag-item-based,bag-user-based");
 			throw new IllegalArgumentException(errorMsg.toString());
 		}
 
